@@ -1,21 +1,21 @@
 /**
  * Cloudflare Pages Function backing the chat widget — served at /api/chat on
- * the same origin as the site, and deployed automatically from this repo on
- * every push to master.
+ * the site's own origin, deployed automatically from this repo on every push.
  *
- * Why server-side at all: Pages serves static files, so an API key placed in
- * the page would be readable by every visitor. It lives in the Pages project
- * as an encrypted secret (Settings → Variables and secrets) and is only ever
- * read here.
+ * Deliberately dependency-free. Using the Anthropic SDK would mean a root
+ * package.json, which makes Cloudflare run `npm install` during the build for
+ * a site that otherwise needs no build at all — one more thing that can fail,
+ * and it did. Pages compiles this TypeScript natively with no install step, so
+ * the deploy cannot break on dependency resolution. The tradeoff is that the
+ * SDK's typed errors and automatic retries are handled by hand below.
  *
- * The Dylan-only restriction is enforced here too, in the system prompt. A
- * check in the browser would stop nobody — anyone can POST to this path
- * directly and skip whatever the page does.
+ * Why a server side exists: Pages serves static files, so an API key in the
+ * page would be readable by every visitor. It lives as an encrypted secret on
+ * the Pages project and is only ever read here.
  *
- * Because this runs on the site's own origin there is no CORS to configure.
+ * The Dylan-only restriction is enforced here, in the system prompt. A check
+ * in the browser would stop nobody — anyone can POST to this path directly.
  */
-
-import Anthropic from "@anthropic-ai/sdk";
 
 interface Env {
   ANTHROPIC_API_KEY: string;
@@ -62,6 +62,8 @@ He was born 24 May 1941 in Duluth, Minnesota, raised in Hibbing, and won the Nob
 
 The site has pages for biography, timeline, discography, songs, tours, stories, interviews, quotes, style, people, covers, library, honors and resources. Point people at the relevant one when it helps.`;
 
+type Msg = { role: "user" | "assistant"; content: string };
+
 function rateLimited(ip: string): boolean {
   const now = Date.now();
   const recent = (hits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
@@ -80,9 +82,9 @@ const json = (body: unknown, status: number) =>
     headers: { "content-type": "application/json" },
   });
 
-/* Single catch-all handler rather than onRequestPost, so a GET gets a proper
-   405 instead of falling through to Pages' static serving and returning the
-   homepage HTML — which is bewildering when you're debugging the endpoint. */
+/* Single catch-all rather than onRequestPost: with only a POST handler a GET
+   falls through to Pages' static serving and returns the homepage HTML, which
+   is baffling when debugging the endpoint. */
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (context.request.method !== "POST") {
     return new Response("Method not allowed", {
@@ -93,9 +95,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   return handlePost(context);
 };
 
-const handlePost: PagesFunction<Env> = async (context) => {
-  const { request, env } = context;
-
+const handlePost: PagesFunction<Env> = async ({ request, env }) => {
   if (!env.ANTHROPIC_API_KEY) {
     return json({ error: "Chat is not configured yet." }, 503);
   }
@@ -105,7 +105,7 @@ const handlePost: PagesFunction<Env> = async (context) => {
     return json({ error: "Too many messages — give it a minute." }, 429);
   }
 
-  let payload: { messages?: Anthropic.MessageParam[] };
+  let payload: { messages?: Msg[] };
   try {
     payload = await request.json();
   } catch {
@@ -113,10 +113,11 @@ const handlePost: PagesFunction<Env> = async (context) => {
   }
 
   const incoming = Array.isArray(payload.messages) ? payload.messages : [];
-  const messages: Anthropic.MessageParam[] = incoming
+  const messages: Msg[] = incoming
     .slice(-MAX_HISTORY)
     .filter(
       (m) =>
+        m &&
         (m.role === "user" || m.role === "assistant") &&
         typeof m.content === "string",
     )
@@ -129,52 +130,96 @@ const handlePost: PagesFunction<Env> = async (context) => {
     return json({ error: "Bad request" }, 400);
   }
 
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });
+  let upstream: Response;
+  try {
+    upstream = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-api-key": env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: MAX_TOKENS,
+        stream: true,
+        // Chat is not reasoning-heavy; low effort keeps latency and cost down.
+        output_config: { effort: "low" },
+        system: [
+          {
+            type: "text",
+            text: SYSTEM_PROMPT,
+            // Stable prefix, so repeat traffic reads it from cache.
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+        messages,
+      }),
+    });
+  } catch {
+    return json({ error: "Couldn't reach Claude. Try again shortly." }, 502);
+  }
+
+  if (!upstream.ok || !upstream.body) {
+    // Read the error body for the log, but never surface it to the browser —
+    // it can echo request details back.
+    const detail = await upstream.text().catch(() => "");
+    console.error("anthropic error", upstream.status, detail.slice(0, 500));
+    const message =
+      upstream.status === 401 || upstream.status === 403
+        ? "The chat service is misconfigured."
+        : upstream.status === 429
+          ? "Busy right now — try again shortly."
+          : "Something went wrong reaching Claude.";
+    return json({ error: message }, 502);
+  }
+
+  // Translate Anthropic's SSE into the simpler frames the widget expects,
+  // so the browser never sees raw API envelopes.
+  const reader = upstream.body.getReader();
+  const decoder = new TextDecoder();
 
   const body = new ReadableStream<Uint8Array>({
     async start(controller) {
+      let buffer = "";
       try {
-        const stream = client.messages.stream({
-          model: MODEL,
-          max_tokens: MAX_TOKENS,
-          // Chat is not a reasoning-heavy workload; low effort keeps latency
-          // and cost down without hurting answers of this kind.
-          output_config: { effort: "low" },
-          system: [
-            {
-              type: "text",
-              text: SYSTEM_PROMPT,
-              // Stable prefix, so repeat traffic reads it from cache.
-              cache_control: { type: "ephemeral" },
-            },
-          ],
-          messages,
-        });
+        for (;;) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
 
-        for await (const event of stream) {
-          if (
-            event.type === "content_block_delta" &&
-            event.delta.type === "text_delta"
-          ) {
-            controller.enqueue(sse({ text: event.delta.text }));
+          const frames = buffer.split("\n\n");
+          buffer = frames.pop() ?? "";
+
+          for (const frame of frames) {
+            for (const line of frame.split("\n")) {
+              if (!line.startsWith("data:")) continue;
+              const raw = line.slice(5).trim();
+              if (!raw || raw === "[DONE]") continue;
+              let evt: any;
+              try {
+                evt = JSON.parse(raw);
+              } catch {
+                continue;
+              }
+              if (
+                evt.type === "content_block_delta" &&
+                evt.delta?.type === "text_delta" &&
+                evt.delta.text
+              ) {
+                controller.enqueue(sse({ text: evt.delta.text }));
+              } else if (evt.type === "message_delta" && evt.delta?.stop_reason === "refusal") {
+                controller.enqueue(sse({ text: "\n\n(I'd rather not answer that one.)" }));
+              } else if (evt.type === "error") {
+                controller.enqueue(sse({ error: "Something went wrong." }));
+              }
+            }
           }
-        }
-
-        const final = await stream.finalMessage();
-        if (final.stop_reason === "refusal") {
-          controller.enqueue(sse({ text: "\n\n(I'd rather not answer that one.)" }));
         }
         controller.enqueue(sse({ done: true }));
       } catch (err) {
-        const message =
-          err instanceof Anthropic.RateLimitError
-            ? "Busy right now — try again shortly."
-            : err instanceof Anthropic.AuthenticationError
-              ? "The chat service is misconfigured."
-              : err instanceof Anthropic.APIError
-                ? "Something went wrong reaching Claude."
-                : "Something went wrong.";
-        controller.enqueue(sse({ error: message }));
+        console.error("stream failed", err);
+        controller.enqueue(sse({ error: "The answer was cut short." }));
       } finally {
         controller.close();
       }

@@ -58,13 +58,20 @@ Errors arrive as `data: {"error":"..."}` in the same stream. Any method other th
 
 History is trimmed to the last 12 turns and 2000 characters per message before forwarding: the API is stateless, so the browser resends the conversation each turn, and without a cap that is an abuse vector.
 
+## No dependencies, on purpose
+
+The function calls the Anthropic REST API with plain `fetch` rather than the SDK, and the repo has no root `package.json`.
+
+That is deliberate. Adding one makes Cloudflare run `npm install` during the build of a site that otherwise needs no build at all — and when that was tried, the deploy stopped shipping. Pages compiles this TypeScript natively with no install step, so the build cannot fail on dependency resolution.
+
+The cost is that the SDK's typed errors and automatic retries are written out by hand here. For one endpoint that is a fair trade; if this grows into several, reconsider it.
+
 ## Local development
 
 ```bash
-npm install
-npx wrangler pages dev .
+npx --yes wrangler@3 pages dev .
 ```
 
-Put `ANTHROPIC_API_KEY=sk-ant-...` in `.dev.vars` at the repo root (already gitignored). The site and the function both come up on `http://localhost:8788`.
+Put `ANTHROPIC_API_KEY=sk-ant-...` in `.dev.vars` at the repo root (already gitignored). Site and function both come up on `http://localhost:8788`.
 
-Wrangler is pinned to 3.x because v4 requires Node ≥22. Cloudflare's own build servers are unaffected by that pin.
+Pin to wrangler 3 — v4 requires Node ≥22. Cloudflare's own build servers are unaffected by that.
