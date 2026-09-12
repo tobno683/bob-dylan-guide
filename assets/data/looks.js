@@ -21,6 +21,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"The Protest Uniform", years:"1963–1964", era:"Village",
+  photos:[
+    { file:"protest-1963.jpg", by:"Rowland Scherman, U.S. National Archives", lic:"Public domain", licUrl:"", src:"https://commons.wikimedia.org/wiki/File:Joan_Baez_Bob_Dylan.jpg",
+      caption:"With Joan Baez at the March on Washington, 28 August 1963 — open work shirt, nothing to look at but the song.",
+      alt:"Bob Dylan and Joan Baez singing together at the 1963 March on Washington, Dylan in an open-collar work shirt with an acoustic guitar." }
+  ],
   summary:"On stage at Newport and the March on Washington, the clothes get plainer as the songs get graver — a deliberate refusal of showbusiness.",
   items:[
     { what:"Open-collar work shirt", detail:"Usually pale, usually rolled at the sleeve. No jacket, no tie, nothing to look at." },
@@ -29,6 +34,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"Wild Mercury", years:"1965–1966", era:"Electric",
+  photos:[
+    { file:"mercury-1966.jpg", by:"Roger Pic, Bibliothèque nationale de France", lic:"Public domain", licUrl:"", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan._Olympia,_1966_-_btv1b10602781d_(12_of_34).jpg",
+      caption:"Olympia, Paris, 1966 — the houndstooth suit and the corona of hair, on the acoustic half of the set.",
+      alt:"Bob Dylan in profile at a microphone in 1966, wearing a houndstooth check suit, hair in a wide halo, acoustic guitar slung low." }
+  ],
   summary:"The most influential eighteen months in the history of rock star dressing. He came back from London with Carnaby Street in his suitcase and turned into something between a Regency dandy, a beatnik and an electrified scarecrow.",
   items:[
     { what:"Ray-Ban Wayfarers", detail:"Worn indoors, at night, during interviews, permanently. The definitive rock-star refusal of eye contact, and the reason a generation of musicians bought Wayfarers." },
@@ -56,6 +66,14 @@ window.DYLAN.looks = [
   ]},
 
 { title:"The Rolling Thunder Mask", years:"1975–1976", era:"Rolling Thunder",
+  photos:[
+    { file:"thunder-1976.jpg", by:"NBC Television", lic:"Public domain", licUrl:"", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_Hard_Rain_1976.jpg",
+      caption:"The Hard Rain television special, 1976 — the second, harder leg of the Revue.",
+      alt:"Bob Dylan performing in 1976 in a brimmed hat at a microphone, black and white." },
+    { file:"thunder-hat.jpg", by:"Adam Jones", lic:"CC BY-SA 3.0", licUrl:"https://creativecommons.org/licenses/by-sa/3.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_-_Rolling_Thunder_Revue-Renaldo_and_Clara_Tour_Hat_-_Graceland-Elvis_Presley_Mansion_-_Memphis_-_Tennessee_-_USA.jpg",
+      caption:"The hat itself — Dylan’s Rolling Thunder Revue hat, now on display at Graceland.",
+      alt:"A pale wide-brimmed hat crowned with fabric roses and daisies, displayed in a museum case." }
+  ],
   summary:"The most theatrical look of his life, and the one fans love most: a travelling medicine show with Dylan in whiteface under a hat piled with flowers.",
   items:[
     { what:"White greasepaint", detail:"Thick, full-face, worn nightly. He has explained it as Commedia dell'arte, as Kabuki, as a way of telling the truth from behind a mask — and, separately, as the result of having seen KISS." },
@@ -65,6 +83,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"The Big Band Years", years:"1978", era:"Street-Legal",
+  photos:[
+    { file:"bigband-1978.jpg", by:"Chris Hakkens", lic:"CC BY-SA 2.0", licUrl:"https://creativecommons.org/licenses/by-sa/2.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_June_23_1978.jpg",
+      caption:"On the 1978 world tour — the showman costume he had spent fifteen years avoiding.",
+      alt:"Bob Dylan on stage in 1978 playing an electric guitar, in an open shirt under a jacket." }
+  ],
   summary:"The most divisive look of all: eyeliner, tight trousers and a revue-show band, which the British press called Vegas and the Japanese audiences adored.",
   items:[
     { what:"Eye makeup", detail:"Heavy kohl for the 1978 world tour — a glam gesture arriving several years after glam." },
@@ -73,6 +96,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"The Gospel Suit", years:"1979–1981", era:"Gospel",
+  photos:[
+    { file:"gospel-1980.jpg", by:"Jean-Luc Ourlin", lic:"CC BY-SA 2.0", licUrl:"https://creativecommons.org/licenses/by-sa/2.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_Gospel_Tour_1980.jpg",
+      caption:"Toronto, April 1980 — mid-gospel tour, playing nothing written before the conversion.",
+      alt:"Bob Dylan singing at a microphone in 1980, in dark clothes, hair close-cropped." }
+  ],
   summary:"Theatre stripped out entirely. On the Warfield stage he looked like a man who had come to testify, because he had.",
   items:[
     { what:"Plain dark suit", detail:"Sober, well-cut, unremarkable — the clothes of a preacher rather than a performer." },
@@ -81,6 +109,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"Eighties Disarray", years:"1984–1989", era:"Eighties",
+  photos:[
+    { file:"eighties-1984.jpg", by:"Chris Hakkens", lic:"CC BY 2.0", licUrl:"https://creativecommons.org/licenses/by/2.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_1984.jpg",
+      caption:"On stage in 1984 — the decade that got away from him sartorially as well as musically.",
+      alt:"Bob Dylan performing in 1984 under red stage light, wearing a brimmed hat." }
+  ],
   summary:"The decade that got away from him sartorially as well as musically — fingerless gloves, cut-off sleeves, headbands and an earring, often all at once.",
   items:[
     { what:"Fingerless gloves", detail:"A Live Aid and Petty-tour fixture, and the single most mocked item in his wardrobe history." },
@@ -90,6 +123,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"Road Clothes", years:"1988–1996", era:"Never Ending Tour",
+  photos:[
+    { file:"road-1991.jpg", by:"Xavier Badosa", lic:"CC BY-SA 3.0", licUrl:"https://creativecommons.org/licenses/by-sa/3.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_1991.jpeg",
+      caption:"1991, a few years into the tour that never ended — no costume, just whatever was in the bag.",
+      alt:"Bob Dylan singing at a microphone in 1991, in a plain dark jacket over a white shirt, hair loose." }
+  ],
   summary:"The early Never Ending Tour years: whatever was in the bag. Leather, denim, a hooded sweatshirt, and a man who had stopped performing an image altogether.",
   items:[
     { what:"Black leather jacket", detail:"Worn nightly, over almost anything." },
@@ -98,6 +136,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"The Riverboat Gambler", years:"1999–2012", era:"Late",
+  photos:[
+    { file:"gambler-2010.jpg", by:"Alberto Cabello", lic:"CC BY 2.0", licUrl:"https://creativecommons.org/licenses/by/2.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_-_Azkena_Rock_Festival_2010_1_(cropped).jpg",
+      caption:"Azkena Rock Festival, 2010 — the flat-brimmed hat and the western suit, fully settled.",
+      alt:"Bob Dylan in 2010 wearing a wide flat-brimmed pale hat and a dark western jacket with a patterned shirt." }
+  ],
   summary:"The look he settled into and has essentially kept: a nineteenth-century Mississippi cardsharp who happens to play electric guitar. This is the Dylan most living fans have actually seen on stage.",
   items:[
     { what:"Western suits with contrast piping", detail:"Black or charcoal, with white or silver piping down the seams and around the pockets, often with a matching stripe on the trouser leg." },
@@ -108,6 +151,11 @@ window.DYLAN.looks = [
   ]},
 
 { title:"The Frock Coat", years:"2013–present", era:"Late",
+  photos:[
+    { file:"frockcoat-2021.jpg", by:"Hwn2013", lic:"CC BY-SA 4.0", licUrl:"https://creativecommons.org/licenses/by-sa/4.0/", src:"https://commons.wikimedia.org/wiki/File:Bob_Dylan_performing_in_the_R&RW_Tour_2021.jpg",
+      caption:"The Rough and Rowdy Ways tour, November 2021 — he works from behind the piano now.",
+      alt:"A wide view of Bob Dylan and his band on a warmly lit stage in 2021, Dylan standing at an upright piano." }
+  ],
   summary:"At eighty-five, on the Rough and Rowdy Ways tour, he plays from behind a piano in a long coat, and the silhouette has barely moved in twenty-five years.",
   items:[
     { what:"Long frock or tail coat", detail:"Nineteenth-century cut, worn over a waistcoat. Formal, theatrical, and completely unbothered by contemporary fashion." },

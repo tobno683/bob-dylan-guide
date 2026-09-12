@@ -710,6 +710,46 @@ td.num { font-family: 'Oswald', sans-serif; color: var(--ink-3); white-space: no
   text-transform: uppercase;
   margin-bottom: 12px;
 }
+/* column layout so cards can vary in height with their photographs */
+.look-masonry { columns: 2; column-gap: 18px; }
+.look-masonry .look { break-inside: avoid; margin-bottom: 18px; }
+
+.look-photo { margin: 0 0 14px; }
+.look-photo a { display: block; }
+.look-photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius);
+  background: var(--paper-2);
+}
+.look-photo figcaption {
+  font-size: .82rem;
+  line-height: 1.45;
+  color: var(--ink-3);
+  margin-top: 8px;
+}
+.look-photo .credit {
+  display: block;
+  font-family: 'Oswald', sans-serif;
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-top: 5px;
+}
+.look-photo .credit a { color: var(--ink-3); }
+.look-photo .credit a:hover { color: var(--accent); }
+
+.look-nopic {
+  font-size: .82rem;
+  font-style: italic;
+  color: var(--ink-3);
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+}
+
 .look ul { margin: 12px 0 0; padding-left: 18px; }
 .look li { margin-bottom: 6px; font-size: .92rem; color: var(--ink-2); }
 .look li strong { color: var(--ink); }
@@ -953,6 +993,7 @@ noscript .notice { display: block; }
 
 @media (max-width: 940px) {
   .quote-masonry { columns: 1; }
+  .look-masonry { columns: 1; }
   .nav-toggle { display: grid; }
   .nav {
     display: none;

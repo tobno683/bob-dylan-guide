@@ -97,10 +97,31 @@ python -m http.server 8080
 
 Push to GitHub and enable Pages on the default branch, root folder. `.nojekyll` is included so GitHub serves the files as-is.
 
+## Photographs
+
+The style page shows ten photographs covering nine of its thirteen looks. Every one is public domain or Creative Commons, self-hosted under `assets/img/style/`, and rendered with the photographer's name, the licence, and a link to the source file. Credits live in `assets/data/looks.js` alongside the look they illustrate.
+
+| Look | Photograph | Credit | Licence |
+|---|---|---|---|
+| The Protest Uniform | March on Washington, 1963 | Rowland Scherman, U.S. National Archives | Public domain |
+| Wild Mercury | Olympia, Paris, 1966 | Roger Pic, Bibliothèque nationale de France | Public domain |
+| The Rolling Thunder Mask | *Hard Rain* TV special, 1976 | NBC Television | Public domain |
+| The Rolling Thunder Mask | The tour hat at Graceland | Adam Jones | CC BY-SA 3.0 |
+| The Big Band Years | On tour, 1978 | Chris Hakkens | CC BY-SA 2.0 |
+| The Gospel Suit | Toronto, 1980 | Jean-Luc Ourlin | CC BY-SA 2.0 |
+| Eighties Disarray | On stage, 1984 | Chris Hakkens | CC BY 2.0 |
+| Road Clothes | 1991 | Xavier Badosa | CC BY-SA 3.0 |
+| The Riverboat Gambler | Azkena Rock Festival, 2010 | Alberto Cabello | CC BY 2.0 |
+| The Frock Coat | Rough and Rowdy Ways tour, 2021 | Hwn2013 | CC BY-SA 4.0 |
+
+Four looks have no photograph — the Guthrie apprentice (1961–62), the Freewheelin' coat (1963), the Woodstock recluse (1967–68) and Nashville Skyline (1969). No freely licensed image of those years exists; the page says so rather than leaving a gap.
+
+The 1966 frame was cropped from a 34-page contact strip in the BnF collection. To add a photograph, drop the file in `assets/img/style/` and add a `photos` entry to that look — **never add one without verifying the licence and recording the credit**, since CC BY and CC BY-SA both make attribution a condition of use.
+
 ## Scope and limitations
 
 - **No lyrics.** Dylan's lyrics are under copyright. This guide quotes only short fragments as commentary and links to the official lyrics at [bobdylan.com](https://www.bobdylan.com/songs/).
-- **No photographs.** Press and album photography is owned by the photographers who took it, so the style page describes the looks rather than reproducing them. The one image on the site is the illustrated header banner (`assets/img/dylan-header.png`), supplied by the site owner.
+- **Photographs are free-licence only.** The style page carries ten photographs, each either public domain or Creative Commons, credited to the photographer and linked to its source file on Wikimedia Commons (see below). Nothing under ordinary press or album copyright is reproduced anywhere on the site.
 - **The song index is selective**, not complete. He has written more than 600 songs; this covers the ones that matter with a note on each.
 - **Tour dates go stale.** Anything current should be checked against [bobdylan.com/on-tour](https://www.bobdylan.com/on-tour/).
 - **Some facts are genuinely disputed** — often because Dylan disputed them himself. Where that's true, the guide says so instead of picking the better story.
