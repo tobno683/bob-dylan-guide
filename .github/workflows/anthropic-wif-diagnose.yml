@@ -1,8 +1,9 @@
-# Diagnostic only. Sends the token exchange several times, corrupting one
-# identifier at a time. Anthropic returns a generic "Authentication failed"
-# for everything, so the useful signal is which variants produce a DIFFERENT
-# response from the control — that isolates the field actually being rejected.
-# Manual trigger only; delete once the federation rule works.
+# Diagnostic only. The token endpoint returns an identical generic 401 for
+# every authentication failure, so the only signal available is which
+# variations change the response. This round isolates the workspace grant:
+# if "default" succeeds where the explicit workspace fails, the service
+# account simply lacks access to that workspace.
+# Manual trigger only; delete once federation works.
 name: anthropic-wif-diagnose
 on:
   workflow_dispatch:
@@ -21,14 +22,6 @@ jobs:
             core.setSecret(token);
             core.exportVariable('JWT', token);
 
-      - name: Fetch a token with the default audience too
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const token = await core.getIDToken();
-            core.setSecret(token);
-            core.exportVariable('JWT_DEFAULT_AUD', token);
-
       - name: Probe the exchange
         env:
           RULE: fdrl_01TU9vWvFJZDGCmmBCrTCMwF
@@ -38,10 +31,16 @@ jobs:
         run: |
           set -uo pipefail
 
+          base () {
+            jq -n --arg a "$JWT" --arg r "$RULE" --arg o "$ORG" --arg s "$SVC" --arg w "$WRK" \
+              '{grant_type:"urn:ietf:params:oauth:grant-type:jwt-bearer",
+                assertion:$a, federation_rule_id:$r, organization_id:$o,
+                service_account_id:$s, workspace_id:$w}'
+          }
+
           probe () {
             local label="$1" body="$2"
-            local out="$RUNNER_TEMP/out.json"
-            local code
+            local out="$RUNNER_TEMP/out.json" code
             code=$(printf '%s' "$body" | curl -sS -o "$out" -w '%{http_code}' \
               https://api.anthropic.com/v1/oauth/token \
               -H "content-type: application/json" --data @-)
@@ -51,22 +50,12 @@ jobs:
             sleep 2
           }
 
-          mk () { # mk <assertion> <rule> <org> <svc> <wrk>
-            jq -n --arg a "$1" --arg r "$2" --arg o "$3" --arg s "$4" --arg w "$5" \
-              '{grant_type:"urn:ietf:params:oauth:grant-type:jwt-bearer",
-                assertion:$a, federation_rule_id:$r, organization_id:$o,
-                service_account_id:$s, workspace_id:$w}'
-          }
-
-          probe "control (everything as issued)"      "$(mk "$JWT" "$RULE" "$ORG" "$SVC" "$WRK")"
-          probe "bogus federation_rule_id"            "$(mk "$JWT" "fdrl_00000000000000000000000000" "$ORG" "$SVC" "$WRK")"
-          probe "bogus organization_id"               "$(mk "$JWT" "$RULE" "00000000-0000-0000-0000-000000000000" "$SVC" "$WRK")"
-          probe "bogus service_account_id"            "$(mk "$JWT" "$RULE" "$ORG" "svac_00000000000000000000000" "$WRK")"
-          probe "bogus workspace_id"                  "$(mk "$JWT" "$RULE" "$ORG" "$SVC" "wrkspc_0000000000000000000000")"
-          probe "garbage assertion"                   "$(mk "not-a-jwt" "$RULE" "$ORG" "$SVC" "$WRK")"
-          probe "assertion with GitHub default aud"   "$(mk "$JWT_DEFAULT_AUD" "$RULE" "$ORG" "$SVC" "$WRK")"
+          probe "control (explicit workspace)" "$(base)"
+          probe "workspace_id = default"       "$(base | jq '.workspace_id = "default"')"
+          probe "workspace_id omitted"         "$(base | jq 'del(.workspace_id)')"
+          probe "service_account_id omitted"   "$(base | jq 'del(.service_account_id)')"
+          probe "organization_id omitted"      "$(base | jq 'del(.organization_id)')"
 
           echo
-          echo "Read the results by comparing each variant against the control."
-          echo "A variant that returns the SAME error as the control means that"
-          echo "field is not what the server rejected first."
+          echo "If any variant returns HTTP 200 where the control returns 401,"
+          echo "the field that changed is the one blocking the exchange."
