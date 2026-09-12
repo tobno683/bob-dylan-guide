@@ -45,7 +45,7 @@ Shared features on every page:
 
 ## Album detail
 
-Album cards on the discography page open a modal with the full tracklist, release date, producer, disc count and the listen buttons. Tracks that the guide flags as key tracks are highlighted in the list.
+Album cards on the discography page open a modal with the full tracklist, release date, producer, disc count and the listen buttons.
 
 Tracklists come from **MusicBrainz** and are stored on each album in `assets/data/albums.js`:
 
