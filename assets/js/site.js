@@ -37,9 +37,10 @@ window.DYLAN = window.DYLAN || {};
 
   function initTheme() {
     let t = null;
-    try { t = localStorage.getItem('dylan-theme'); } catch (e) { /* private mode */ }
-    if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    document.documentElement.setAttribute('data-theme', t);
+    try { t = localStorage.getItem('dylan-theme'); } catch (e) { /* storage blocked */ }
+    // Dark is the default and the stylesheet already paints it, so only a
+    // stored preference for light actually changes anything here.
+    document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
   }
 
   function toggleTheme() {

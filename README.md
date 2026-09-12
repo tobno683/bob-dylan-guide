@@ -40,7 +40,7 @@ Shared features on every page:
 
 - **Global search** across every dataset — click the ⌕ or press <kbd>/</kbd>
 - **Per-page filtering** by category, plus free-text filter
-- **Light and dark themes**, following your system setting, toggleable in the header
+- **Dark by default**, with a light theme in the header toggle; the choice is remembered per browser
 - Responsive down to phone width; prints cleanly
 
 ## Listen links

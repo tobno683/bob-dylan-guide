@@ -3,27 +3,11 @@
    Vintage broadside / newsprint Americana
    ============================================================ */
 
+/* Dark is the default, declared on bare :root rather than applied by script —
+   so the page paints dark immediately, with no flash of light while the
+   stylesheet and data files load. Light is opt-in via the header toggle,
+   which stamps data-theme="light" on the root element. */
 :root {
-  --paper:      #f5efe3;
-  --paper-2:    #ece4d3;
-  --paper-3:    #e2d8c3;
-  --card:       #fffdf7;
-  --ink:        #17140f;
-  --ink-2:      #4c4438;
-  --ink-3:      #7d7160;
-  --rule:       #d7cbb3;
-  --rule-soft:  #e6dcc7;
-  --accent:     #a33a16;
-  --accent-2:   #8a6d1f;
-  --accent-dim: #a33a1618;
-  --shadow:     0 1px 2px rgba(60,45,20,.07), 0 10px 30px rgba(60,45,20,.07);
-  --shadow-sm:  0 1px 2px rgba(60,45,20,.08);
-  --radius:     3px;
-  --maxw:       1180px;
-  color-scheme: light;
-}
-
-:root[data-theme="dark"] {
   --paper:      #121009;
   --paper-2:    #1a1610;
   --paper-3:    #241f17;
@@ -38,7 +22,27 @@
   --accent-dim: #e07a4520;
   --shadow:     0 1px 2px rgba(0,0,0,.45), 0 10px 30px rgba(0,0,0,.35);
   --shadow-sm:  0 1px 2px rgba(0,0,0,.5);
+  --radius:     3px;
+  --maxw:       1180px;
   color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --paper:      #f5efe3;
+  --paper-2:    #ece4d3;
+  --paper-3:    #e2d8c3;
+  --card:       #fffdf7;
+  --ink:        #17140f;
+  --ink-2:      #4c4438;
+  --ink-3:      #7d7160;
+  --rule:       #d7cbb3;
+  --rule-soft:  #e6dcc7;
+  --accent:     #a33a16;
+  --accent-2:   #8a6d1f;
+  --accent-dim: #a33a1618;
+  --shadow:     0 1px 2px rgba(60,45,20,.07), 0 10px 30px rgba(60,45,20,.07);
+  --shadow-sm:  0 1px 2px rgba(60,45,20,.08);
+  color-scheme: light;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -455,7 +459,7 @@ h1, h2, h3, h4, h5 {
 }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
 .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
-:root[data-theme="dark"] .chip.on { color: #1a1610; }
+:root:not([data-theme="light"]) .chip.on { color: #1a1610; }
 
 .result-count {
   font-family: 'Oswald', sans-serif;
@@ -578,7 +582,7 @@ h1, h2, h3, h4, h5 {
   border-radius: 100px;
   white-space: nowrap;
 }
-:root[data-theme="dark"] .era-years { color: #1a1610; }
+:root:not([data-theme="light"]) .era-years { color: #1a1610; }
 .era-head h2 { margin: 0; font-size: clamp(1.5rem, 3.6vw, 2.2rem); }
 .era-tag {
   font-family: 'Oswald', sans-serif;
@@ -830,8 +834,8 @@ noscript .notice { display: block; }
 
 .lbtn.sp:hover { border-color: #1db954; color: #178a41; background: #1db9540f; }
 .lbtn.yt:hover { border-color: #ff0033; color: #c4002a; background: #ff00330f; }
-:root[data-theme="dark"] .lbtn.sp:hover { color: #4ade80; }
-:root[data-theme="dark"] .lbtn.yt:hover { color: #ff6b8a; }
+:root:not([data-theme="light"]) .lbtn.sp:hover { color: #4ade80; }
+:root:not([data-theme="light"]) .lbtn.yt:hover { color: #ff6b8a; }
 
 /* a verified direct link, rather than a search */
 .lbtn.exact { border-color: #1db95466; color: var(--ink); }
