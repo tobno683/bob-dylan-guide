@@ -4,10 +4,11 @@ compatibility_date = "2026-09-01"
 compatibility_flags = ["nodejs_compat"]
 
 [vars]
-# The one origin allowed to call this Worker. Not a security boundary on its
-# own — a browser sends Origin, but curl can send anything — it just stops
-# other sites embedding your endpoint.
-ALLOWED_ORIGIN = "https://tobno683.github.io"
+# Comma-separated origins allowed to call this Worker. The site is served from
+# both GitHub Pages and Cloudflare Pages, so both are listed. Not a security
+# boundary on its own — a browser sends Origin honestly, curl sends whatever it
+# likes — it just stops other sites embedding your endpoint.
+ALLOWED_ORIGIN = "https://tobno683.github.io,https://bob-dylan-guide.pages.dev"
 
 # ANTHROPIC_API_KEY is a secret, not a var. Set it with:
 #   npx wrangler secret put ANTHROPIC_API_KEY

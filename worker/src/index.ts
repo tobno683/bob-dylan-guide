@@ -14,7 +14,10 @@ import Anthropic from "@anthropic-ai/sdk";
 
 export interface Env {
   ANTHROPIC_API_KEY: string;
-  /** Exact origin allowed to call this Worker, e.g. https://tobno683.github.io */
+  /** Comma-separated list of origins allowed to call this Worker. The site is
+   *  served from both GitHub Pages and Cloudflare Pages, so there is more than
+   *  one. CORS allows only a single origin per response, so the matching one is
+   *  echoed back rather than the whole list. */
   ALLOWED_ORIGIN: string;
 }
 
@@ -60,9 +63,15 @@ He was born 24 May 1941 in Duluth, Minnesota, raised in Hibbing, and won the Nob
 
 The site itself has pages for biography, timeline, discography, songs, tours, stories, interviews, quotes, style, people, covers, library, honors and resources. Point people at the relevant one when it helps.`;
 
-function corsHeaders(env: Env): Record<string, string> {
+function allowList(env: Env): string[] {
+  return env.ALLOWED_ORIGIN.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
+function corsHeaders(env: Env, requestOrigin: string | null): Record<string, string> {
+  const list = allowList(env);
+  const match = requestOrigin && list.includes(requestOrigin) ? requestOrigin : list[0];
   return {
-    "access-control-allow-origin": env.ALLOWED_ORIGIN,
+    "access-control-allow-origin": match ?? "",
     "access-control-allow-methods": "POST, OPTIONS",
     "access-control-allow-headers": "content-type",
     "access-control-max-age": "86400",
@@ -85,7 +94,8 @@ function sse(obj: unknown): Uint8Array {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const cors = corsHeaders(env);
+    const origin = request.headers.get("origin");
+    const cors = corsHeaders(env, origin);
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors });
@@ -94,8 +104,7 @@ export default {
       return new Response("Method not allowed", { status: 405, headers: cors });
     }
     // The browser sends Origin on cross-origin POSTs; reject anything else.
-    const origin = request.headers.get("origin");
-    if (origin && origin !== env.ALLOWED_ORIGIN) {
+    if (origin && !allowList(env).includes(origin)) {
       return new Response("Forbidden", { status: 403, headers: cors });
     }
 
