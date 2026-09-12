@@ -9,16 +9,24 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=2026091302">
+<link rel="stylesheet" href="assets/css/style.css?v=2026091304">
 </head>
 <body>
 
-<div class="wrap">
-  <header class="page-head">
-    <p class="kicker">The Records</p>
-    <h1>Discography</h1>
-    <p class="lede">All forty studio albums across sixty-four years, the major live records, every volume of the Bootleg Series, and two supergroup albums with joke surnames. Filter by kind, or search for anything.</p>
-  </header>
+<div class="page-stage">
+  <div class="page-banner">
+    <img src="assets/img/page-header.png" width="1920" height="640" alt=""
+         fetchpriority="high" decoding="async">
+  </div>
+  <div class="page-copy">
+    <div class="wrap">
+      <header class="page-head">
+        <p class="kicker">The Records</p>
+        <h1>Discography</h1>
+        <p class="lede">All forty studio albums across sixty-four years, the major live records, every volume of the Bootleg Series, and two supergroup albums with joke surnames. Filter by kind, or search for anything.</p>
+      </header>
+    </div>
+  </div>
 </div>
 
 <main class="wrap">
@@ -26,46 +34,131 @@
   <div id="disc-mount"></div>
 </main>
 
-<script src="assets/data/albums.js?v=2026091302"></script>
-<script src="assets/data/songs.js?v=2026091302"></script>
-<script src="assets/data/timeline.js?v=2026091302"></script>
-<script src="assets/data/quotes.js?v=2026091302"></script>
-<script src="assets/data/stories.js?v=2026091302"></script>
-<script src="assets/data/interviews.js?v=2026091302"></script>
-<script src="assets/data/people.js?v=2026091302"></script>
-<script src="assets/data/looks.js?v=2026091302"></script>
-<script src="assets/data/library.js?v=2026091302"></script>
-<script src="assets/data/honors.js?v=2026091302"></script>
-<script src="assets/data/tours.js?v=2026091302"></script>
-<script src="assets/data/covers.js?v=2026091302"></script>
-<script src="assets/data/resources.js?v=2026091302"></script>
-<script src="assets/data/eras.js?v=2026091302"></script>
-<script src="assets/js/site.js?v=2026091302"></script>
+<div class="modal-backdrop" id="album-modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script src="assets/data/albums.js?v=2026091304"></script>
+<script src="assets/data/songs.js?v=2026091304"></script>
+<script src="assets/data/timeline.js?v=2026091304"></script>
+<script src="assets/data/quotes.js?v=2026091304"></script>
+<script src="assets/data/stories.js?v=2026091304"></script>
+<script src="assets/data/interviews.js?v=2026091304"></script>
+<script src="assets/data/people.js?v=2026091304"></script>
+<script src="assets/data/looks.js?v=2026091304"></script>
+<script src="assets/data/library.js?v=2026091304"></script>
+<script src="assets/data/honors.js?v=2026091304"></script>
+<script src="assets/data/tours.js?v=2026091304"></script>
+<script src="assets/data/covers.js?v=2026091304"></script>
+<script src="assets/data/resources.js?v=2026091304"></script>
+<script src="assets/data/eras.js?v=2026091304"></script>
+<script src="assets/js/site.js?v=2026091304"></script>
 <script>
 DYLAN.chrome();
 var esc = DYLAN.esc;
 
+var ALBUMS = DYLAN.albums;
+ALBUMS.forEach(function (a, i) { a._i = i; });
+
+function isFilm(a) { return a.type === 'Side project' && /film/i.test(a.title); }
+
 DYLAN.filterList({
-  data: DYLAN.albums,
+  data: ALBUMS,
   mount: '#disc-mount',
   facetField: 'type',
   countNoun: 'records',
   searchFields: ['title', 'note', 'type', 'producer', 'key', 'year', 'date'],
   render: function (rows) {
     return '<div class="grid grid-2">' + rows.map(function (a) {
-      return '<article class="album">' +
+      var hasDetail = a.tracks && a.tracks.length;
+      return '<article class="album' + (hasDetail ? ' clickable' : '') + '" data-i="' + a._i + '">' +
         (a.n ? '<span class="album-rank">' + a.n + '</span>' : '') +
         '<span class="album-year">' + esc(a.date || a.year) + '</span>' +
         '<h3 class="album-title">' + esc(a.title) + '</h3>' +
         '<span class="album-meta">' + esc(a.type) + (a.producer ? ' &middot; Produced by ' + esc(a.producer) : '') + '</span>' +
         '<p class="album-note">' + esc(a.note) + '</p>' +
         (a.key && a.key.length ? '<div class="album-tracks">Key tracks: ' + a.key.map(esc).join(' &middot; ') + '</div>' : '') +
-        (a.type === 'Side project' && /film/i.test(a.title)
-          ? ''
-          : DYLAN.music({ title: a.title, kind: 'album', spotify: a.spotify })) +
+        (isFilm(a) ? '' : DYLAN.music({ title: a.title, kind: 'album', spotify: a.spotify })) +
+        (hasDetail
+          ? '<button class="album-more" data-i="' + a._i + '">' +
+              (a.trackTotal || a.tracks.length) + ' tracks &amp; details →</button>'
+          : '') +
         '</article>';
     }).join('') + '</div>';
   }
+});
+
+/* ---------- album detail modal ---------- */
+
+var modal = document.getElementById('album-modal');
+var modalBody = document.getElementById('modal-body');
+var lastFocus = null;
+
+function trackRow(t, n, keySet) {
+  var title = t[0], dur = t[1];
+  var isKey = keySet.has(title.toLowerCase().replace(/\s*\(.*?\)\s*$/, '').trim());
+  return '<li' + (isKey ? ' class="is-key"' : '') + '>' +
+    '<span class="n">' + n + '</span>' +
+    '<span class="t">' + esc(title) + '</span>' +
+    '<span class="d">' + esc(dur) + '</span></li>';
+}
+
+function openAlbum(i) {
+  var a = ALBUMS[i];
+  if (!a) return;
+
+  var keySet = new Set((a.key || []).map(function (k) {
+    return k.toLowerCase().replace(/\s*\(.*?\)\s*$/, '').trim();
+  }));
+
+  var shown = a.tracks || [];
+  var total = a.trackTotal || shown.length;
+  var truncated = total > shown.length;
+
+  modalBody.innerHTML =
+    '<p class="m-kicker">' + esc(a.type) + (a.n ? ' &middot; Album no. ' + a.n : '') + '</p>' +
+    '<h2 id="modal-title">' + esc(a.title) + '</h2>' +
+    '<p class="m-meta">Released ' + esc(a.date || a.year) +
+      (a.producer ? ' &nbsp;&middot;&nbsp; Produced by ' + esc(a.producer) : '') +
+      (a.discs > 1 ? ' &nbsp;&middot;&nbsp; ' + a.discs + ' discs' : '') + '</p>' +
+    '<p class="m-note">' + esc(a.note) + '</p>' +
+    (isFilm(a) ? '' : DYLAN.music({ title: a.title, kind: 'album', spotify: a.spotify })) +
+    '<p class="m-sec">Tracklist' + (truncated ? ' — first ' + shown.length + ' of ' + total : '') + '</p>' +
+    '<ol class="tracklist">' + shown.map(function (t, n) { return trackRow(t, n + 1, keySet); }).join('') + '</ol>' +
+    (truncated
+      ? '<p class="m-foot">This is a box set of ' + total + ' tracks; the rest are listed at the source below.</p>'
+      : '') +
+    '<p class="m-foot">Tracklist from <a href="https://musicbrainz.org/release-group/' + esc(a.mbid || '') +
+      '" rel="noopener nofollow">MusicBrainz</a>' +
+      (keySet.size ? '. Highlighted titles are the key tracks noted above.' : '.') + '</p>';
+
+  lastFocus = document.activeElement;
+  modal.hidden = false;
+  document.body.style.overflow = 'hidden';
+  modal.querySelector('.modal-close').focus();
+}
+
+function closeAlbum() {
+  modal.hidden = true;
+  document.body.style.overflow = '';
+  if (lastFocus && lastFocus.focus) lastFocus.focus();
+}
+
+document.getElementById('disc-mount').addEventListener('click', function (e) {
+  if (e.target.closest('a')) return;              // let the listen links through
+  var card = e.target.closest('.album.clickable');
+  if (card) openAlbum(Number(card.dataset.i));
+});
+
+modal.addEventListener('click', function (e) {
+  if (e.target === modal || e.target.closest('.modal-close')) closeAlbum();
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !modal.hidden) { e.stopPropagation(); closeAlbum(); }
 });
 </script>
 </body>
