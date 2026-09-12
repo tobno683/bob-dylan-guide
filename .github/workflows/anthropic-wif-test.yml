@@ -1,7 +1,12 @@
 name: anthropic-wif-test
+# The federation rule matches event_name = push, so this cannot be triggered
+# by workflow_dispatch — a dispatch run presents the wrong claim and is
+# rejected. Limited to changes to this file so it doesn't call the API on
+# every commit to the site.
 on:
   push:
-  workflow_dispatch:
+    paths:
+      - '.github/workflows/anthropic-wif-test.yml'
 permissions:
   id-token: write
   contents: read
