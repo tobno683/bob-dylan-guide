@@ -1,0 +1,14 @@
+name = "dylan-guide-chat"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+# The one origin allowed to call this Worker. Not a security boundary on its
+# own — a browser sends Origin, but curl can send anything — it just stops
+# other sites embedding your endpoint.
+ALLOWED_ORIGIN = "https://tobno683.github.io"
+
+# ANTHROPIC_API_KEY is a secret, not a var. Set it with:
+#   npx wrangler secret put ANTHROPIC_API_KEY
+# Never put it in this file — this file is committed.

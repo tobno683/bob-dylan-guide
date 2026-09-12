@@ -1,6 +1,11 @@
-.DS_Store
+﻿.DS_Store
 Thumbs.db
 desktop.ini
 *.log
 .vscode/
 .idea/
+
+# worker
+worker/node_modules/
+worker/.wrangler/
+.dev.vars
