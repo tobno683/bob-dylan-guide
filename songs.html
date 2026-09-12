@@ -53,11 +53,12 @@ DYLAN.filterList({
   searchFields: ['title', 'album', 'note', 'era', 'year'],
   render: function (rows) {
     return '<div class="table-wrap"><table><thead><tr>' +
-      '<th style="width:64px">Year</th><th>Song</th><th style="width:200px">First released on</th><th>Note</th>' +
+      '<th style="width:64px">Year</th><th style="width:210px">Song</th><th style="width:180px">First released on</th><th>Note</th>' +
       '</tr></thead><tbody>' +
       rows.map(function (s) {
         return '<tr><td class="num">' + esc(s.year) + '</td>' +
-          '<td><strong>' + esc(s.title) + '</strong></td>' +
+          '<td><strong>' + esc(s.title) + '</strong>' +
+            DYLAN.music({ title: s.title, kind: 'track', compact: true }) + '</td>' +
           '<td style="color:var(--ink-3);font-size:.88rem">' + esc(s.album) + '</td>' +
           '<td style="color:var(--ink-2)">' + esc(s.note) + '</td></tr>';
       }).join('') +

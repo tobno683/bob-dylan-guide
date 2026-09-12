@@ -243,6 +243,50 @@ window.DYLAN = window.DYLAN || {};
     }, { passive: true });
   };
 
+  /* ---------- listen links ---------- */
+
+  const SP_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12"/><path d="M6.2 9.4c3.6-1 8-0.7 11.2 1.2M7 12.6c3-0.8 6.6-0.5 9.3 1.1M7.7 15.7c2.4-0.6 5.3-0.4 7.5 0.9" stroke-width="1.7" stroke-linecap="round" fill="none"/></svg>';
+  const YT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4.5" width="22" height="15" rx="4.2"/><path d="M10 8.6l5.6 3.4L10 15.4z" fill="#fff"/></svg>';
+
+  /* Build Spotify + YouTube buttons for a record or a song.
+     o = { title, artist (default Bob Dylan), kind: 'album'|'track', spotify: <verified id> }
+     A verified Spotify album id produces a direct link; otherwise both platforms
+     get a scoped search, which always resolves and never rots. */
+  DYLAN.music = function (o) {
+    const artist = o.artist || 'Bob Dylan';
+    const clean = String(o.title).replace(/[“”"]/g, '').trim();
+    if (!clean) return '';
+    const isAlbum = o.kind === 'album';
+    const label = artist === 'Bob Dylan' ? clean : artist + ' — ' + clean;
+
+    // Don't repeat the artist when the title already carries it ("Bob Dylan at Budokan")
+    const query = clean.toLowerCase().indexOf(artist.toLowerCase()) !== -1
+      ? clean
+      : artist + ' ' + clean;
+
+    const spHref = o.spotify
+      ? 'https://open.spotify.com/album/' + o.spotify
+      : 'https://open.spotify.com/search/' + encodeURIComponent(query) +
+        (isAlbum ? '/albums' : '/tracks');
+    const spTitle = o.spotify ? 'Open “' + label + '” on Spotify' : 'Find “' + label + '” on Spotify';
+
+    const ytHref = 'https://www.youtube.com/results?search_query=' +
+      encodeURIComponent(query + (isAlbum ? ' full album' : ''));
+    const ytTitle = 'Find “' + label + '” on YouTube';
+
+    const compact = !!o.compact;
+    const btn = (cls, href, tip, icon, text, isSearch) =>
+      '<a class="lbtn ' + cls + '" href="' + esc(href) + '" target="_blank"' +
+        ' rel="noopener noreferrer" title="' + esc(tip) + '" aria-label="' + esc(tip) + '">' +
+        icon + (compact ? '' : '<span>' + text + '</span>') +
+        (isSearch && !compact ? '<i aria-hidden="true">⌕</i>' : '') + '</a>';
+
+    return '<div class="listen' + (compact ? ' compact' : '') + '">' +
+      btn('sp' + (o.spotify ? ' exact' : ''), spHref, spTitle, SP_ICON, 'Spotify', !o.spotify) +
+      btn('yt', ytHref, ytTitle, YT_ICON, 'YouTube', true) +
+      '</div>';
+  };
+
   /* ---------- shared list helpers ---------- */
 
   DYLAN.filterList = function (opts) {

@@ -53,9 +53,15 @@ DYLAN.filterList({
   searchFields: ['artist', 'song', 'note', 'kind', 'year'],
   render: function (rows) {
     return rows.map(function (c) {
+      // Various-artists collections have no single recording to point at, so no buttons.
+      var linkable = !/^various$/i.test(c.artist) && !/^various$/i.test(c.song);
+      // "Dylanesque (2007)" / "Blonde on Blonde (complete)" — the suffix is editorial, not part of the title
+      var song = c.song.replace(/\s*\((?:complete|\d{4})\)\s*$/i, '').trim();
       return '<article class="entry"><h3>' + esc(c.artist) + ' — “' + esc(c.song) + '”</h3>' +
         '<div class="entry-meta"><span>' + esc(c.year) + '</span><span class="dot">&middot;</span><span>' + esc(c.kind) + '</span></div>' +
-        '<p>' + esc(c.note) + '</p></article>';
+        '<p>' + esc(c.note) + '</p>' +
+        (linkable ? DYLAN.music({ title: song, artist: c.artist, kind: 'track' }) : '') +
+        '</article>';
     }).join('');
   }
 });

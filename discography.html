@@ -60,6 +60,9 @@ DYLAN.filterList({
         '<span class="album-meta">' + esc(a.type) + (a.producer ? ' &middot; Produced by ' + esc(a.producer) : '') + '</span>' +
         '<p class="album-note">' + esc(a.note) + '</p>' +
         (a.key && a.key.length ? '<div class="album-tracks">Key tracks: ' + a.key.map(esc).join(' &middot; ') + '</div>' : '') +
+        (a.type === 'Side project' && /film/i.test(a.title)
+          ? ''
+          : DYLAN.music({ title: a.title, kind: 'album', spotify: a.spotify })) +
         '</article>';
     }).join('') + '</div>';
   }
