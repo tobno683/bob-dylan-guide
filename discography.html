@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discography · The Bob Dylan Fan Guide</title>
+<meta name="description" content="Every Bob Dylan album — all 40 studio records, the live albums, all 18 volumes of the Bootleg Series, key compilations and side projects, with notes on each.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">The Records</p>
+    <h1>Discography</h1>
+    <p class="lede">All forty studio albums across sixty-four years, the major live records, every volume of the Bootleg Series, and two supergroup albums with joke surnames. Filter by kind, or search for anything.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <p class="notice">Studio albums are numbered in release order. Dates are original release dates; almost everything here has been remastered and reissued since. The <strong>Bootleg Series</strong> filter shows 16 releases covering volumes 1–18, because Vol. 1–3 was issued as a single box. The <strong>Live</strong> and <strong>Compilation</strong> lists are selective — he has released far more of both, and <a href="https://en.wikipedia.org/wiki/Bob_Dylan_discography" rel="noopener">the full discography</a> runs to hundreds of entries.</p>
+  <div id="disc-mount"></div>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.albums,
+  mount: '#disc-mount',
+  facetField: 'type',
+  countNoun: 'records',
+  searchFields: ['title', 'note', 'type', 'producer', 'key', 'year', 'date'],
+  render: function (rows) {
+    return '<div class="grid grid-2">' + rows.map(function (a) {
+      return '<article class="album">' +
+        (a.n ? '<span class="album-rank">' + a.n + '</span>' : '') +
+        '<span class="album-year">' + esc(a.date || a.year) + '</span>' +
+        '<h3 class="album-title">' + esc(a.title) + '</h3>' +
+        '<span class="album-meta">' + esc(a.type) + (a.producer ? ' &middot; Produced by ' + esc(a.producer) : '') + '</span>' +
+        '<p class="album-note">' + esc(a.note) + '</p>' +
+        (a.key && a.key.length ? '<div class="album-tracks">Key tracks: ' + a.key.map(esc).join(' &middot; ') + '</div>' : '') +
+        '</article>';
+    }).join('') + '</div>';
+  }
+});
+</script>
+</body>
+</html>

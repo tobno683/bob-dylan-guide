@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tours · The Bob Dylan Fan Guide</title>
+<meta name="description" content="Bob Dylan's touring history — the folk circuit, the 1966 world tour, Rolling Thunder, the gospel tours, the Never Ending Tour and the current Rough and Rowdy Ways run.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">On the Road</p>
+    <h1>Tours</h1>
+    <p class="lede">He has been performing in public since 1961 and touring more or less continuously since 1988. This is the shape of it.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <p class="notice">Tour dates change. For anything current, the official list at <a href="https://www.bobdylan.com/on-tour/" rel="noopener">bobdylan.com/on-tour</a> is the only reliable source.</p>
+  <div id="tours-mount"></div>
+
+  <section class="section">
+    <div class="sec-head"><h2>The Never Ending Tour, by the numbers</h2></div>
+    <div class="grid grid-4">
+      <div class="card"><h3>7 June 1988</h3><p>The first night, in Concord, California, with a three-piece band led by G. E. Smith.</p></div>
+      <div class="card"><h3>~100 shows a year</h3><p>Through most of the 1990s. 1999 alone ran to 117 concerts.</p></div>
+      <div class="card"><h3>3,000+</h3><p>Concerts played since 1988 — more than the rest of his career combined, several times over.</p></div>
+      <div class="card"><h3>Tony Garnier</h3><p>On bass since 1989, and the longest-serving musician in Dylan's entire history.</p></div>
+    </div>
+    <p style="color:var(--ink-2);max-width:760px;margin-top:22px">The name was coined by a journalist from an offhand remark, and Dylan has resented it ever since — most entertainingly in the liner notes to <em>World Gone Wrong</em>, where he insists the Never Ending Tour ended in 1991 and lists a series of invented successors instead.</p>
+  </section>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.tours,
+  mount: '#tours-mount',
+  facetField: 'era',
+  countNoun: 'tours',
+  searchFields: ['name', 'years', 'note', 'band', 'era'],
+  render: function (rows) {
+    return rows.map(function (t) {
+      return '<article class="entry"><h3>' + esc(t.name) + '</h3>' +
+        '<div class="entry-meta"><span>' + esc(t.years) + '</span><span class="dot">&middot;</span><span>' + esc(t.band) + '</span></div>' +
+        '<p>' + esc(t.note) + '</p></article>';
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

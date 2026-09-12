@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Bob Dylan Fan Guide</title>
+<meta name="description" content="An independent guide to Bob Dylan — the records, the songs, the tours, the interviews, the stories and the clothes. Sixty-five years of work, sorted.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<section class="hero">
+  <div class="wrap">
+    <p class="kicker">An independent fan guide</p>
+    <h1>Bob Dylan</h1>
+    <div class="hero-rule"></div>
+    <p class="lede">Sixty-five years of records, tours, interviews, arguments and hats — collected, sorted and annotated by people who can't stop listening.</p>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">40</span><span class="stat-label">Studio albums</span></div>
+      <div class="stat"><span class="stat-num">18</span><span class="stat-label">Bootleg volumes</span></div>
+      <div class="stat"><span class="stat-num">600+</span><span class="stat-label">Songs written</span></div>
+      <div class="stat"><span class="stat-num">3,000+</span><span class="stat-label">Shows since 1988</span></div>
+      <div class="stat"><span class="stat-num">1</span><span class="stat-label">Nobel Prize</span></div>
+    </div>
+  </div>
+</section>
+
+<main class="wrap">
+
+  <noscript>
+    <p class="notice" style="margin-top:34px">This guide builds its pages with JavaScript. Please enable it, or browse the underlying data files in <code>assets/data/</code>.</p>
+  </noscript>
+
+  <section class="section">
+    <div class="sec-head"><h2>Start here</h2></div>
+    <div class="grid grid-3 card-index" id="start-cards"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>The life, in ten eras</h2><span class="count">Biography</span></div>
+    <div class="jump" id="era-jump"></div>
+    <p style="color:var(--ink-2);max-width:720px">From a mining town on the Mesabi Iron Range to the Nobel Prize in Literature, by way of a motorcycle crash, a religious conversion, a decade nobody enjoyed, and the longest tour in the history of popular music.</p>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>This month in Dylan history</h2><span class="count" id="month-label"></span></div>
+    <div id="on-this-month"></div>
+  </section>
+
+  <section class="section">
+    <div id="random-quote"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>Where he is right now</h2><span class="count">2026</span></div>
+    <div class="grid grid-2">
+      <div class="card">
+        <h3>Still on the road</h3>
+        <p>The Rough and Rowdy Ways tour began in November 2021 and is still running. It passes its 300th concert in 2026 — a 27-date US run opened in Omaha on 21 March, with summer dates through the Southwest and Midwest, Forest Hills Stadium in New York on 21 July, and five nights at London's Royal Festival Hall at the end of the year. He is 85, and in his 65th year of performing.</p>
+        <p style="margin-top:10px"><a href="tours.html">Touring history →</a> &nbsp; <a href="https://www.bobdylan.com/on-tour/">Official dates →</a></p>
+      </div>
+      <div class="card">
+        <h3>The most recent release</h3>
+        <p><em>The Bootleg Series Vol. 18: Through the Open Window, 1956–1963</em> arrived on Halloween 2025 — eight discs and 139 tracks covering the years from a Hibbing teenager to the finished article, including 48 previously unreleased performances and the complete 1963 Carnegie Hall concert.</p>
+        <p style="margin-top:10px"><a href="discography.html">Full discography →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>Everything in this guide</h2></div>
+    <div class="grid grid-4 card-index" id="all-cards"></div>
+  </section>
+
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+
+var esc = DYLAN.esc;
+
+/* --- Start here cards --- */
+var START = [
+  ['biography.html', 'The Life', 'Ten eras, from the Iron Range to the Nobel Prize and the tour that is still running.'],
+  ['discography.html', 'The Records', 'All 40 studio albums, the live records, and every volume of the Bootleg Series.'],
+  ['songs.html', 'The Songs', 'The essential ones, with where they came from and why they matter.'],
+  ['stories.html', 'Stories & Legends', 'Judas, the axe at Newport, the organ part, the man in the rain in New Jersey.'],
+  ['interviews.html', 'In His Own Words', 'Sixty years of interviews, press conferences and speeches.'],
+  ['style.html', 'The Clothes', 'Wayfarers, polka dots, whiteface and flowers, and the riverboat gambler suit.']
+];
+document.getElementById('start-cards').innerHTML = START.map(function (c) {
+  return '<div class="card link-card"><a href="' + c[0] + '"><h3>' + esc(c[1]) + '</h3>' +
+    '<p>' + esc(c[2]) + '</p><span class="card-arrow">Open →</span></a></div>';
+}).join('');
+
+/* --- Era jump strip --- */
+document.getElementById('era-jump').innerHTML = DYLAN.eras.map(function (e) {
+  return '<a href="biography.html#' + e.id + '">' + esc(e.years) + ' · ' + esc(e.title) + '</a>';
+}).join('');
+
+/* --- This month in history --- */
+var MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+var thisMonth = MONTHS[new Date().getMonth()];
+document.getElementById('month-label').textContent = thisMonth;
+
+var hits = DYLAN.timeline.filter(function (t) {
+  return t.date && t.date.indexOf(thisMonth) !== -1;
+}).sort(function (a, b) { return a.year - b.year; });
+
+document.getElementById('on-this-month').innerHTML = hits.length
+  ? '<div class="timeline">' + hits.map(function (t) {
+      return '<div class="tl-item"><div class="tl-date">' + esc(t.date) + '</div>' +
+        '<div class="tl-body"><strong>' + esc(t.title) + '</strong><p>' + esc(t.body) + '</p></div></div>';
+    }).join('') + '</div>'
+  : '<p class="empty">Nothing catalogued for ' + esc(thisMonth) + ' yet — try the <a href="timeline.html">full timeline</a>.</p>';
+
+/* --- Random quote --- */
+var q = DYLAN.quotes[Math.floor(Math.random() * DYLAN.quotes.length)];
+document.getElementById('random-quote').innerHTML =
+  '<blockquote class="pull">“' + esc(q.text) + '”<span>' + esc(q.source) + '</span></blockquote>';
+
+/* --- Full index --- */
+var ALL = [
+  ['biography.html', 'Biography', 'The life in ten eras'],
+  ['timeline.html', 'Timeline', 'Year by year, 1941 to now'],
+  ['discography.html', 'Discography', 'Every album'],
+  ['songs.html', 'Songs', 'The essential catalogue'],
+  ['tours.html', 'Tours', 'From the folk circuit to now'],
+  ['stories.html', 'Stories', 'Anecdotes and disputed history'],
+  ['interviews.html', 'Interviews', 'Press, radio, television, speeches'],
+  ['quotes.html', 'Quotes', 'What he actually said'],
+  ['style.html', 'Style', 'Clothes, objects, instruments'],
+  ['people.html', 'People', 'Family, bands, producers, chroniclers'],
+  ['covers.html', 'Covers', 'Other people singing his songs'],
+  ['library.html', 'Library', 'Books and films'],
+  ['honors.html', 'Honors', 'Awards, prizes and medals'],
+  ['resources.html', 'Resources', 'Where to go next']
+];
+document.getElementById('all-cards').innerHTML = ALL.map(function (c) {
+  return '<div class="card link-card"><a href="' + c[0] + '"><h3>' + esc(c[1]) + '</h3>' +
+    '<p>' + esc(c[2]) + '</p></a></div>';
+}).join('');
+</script>
+</body>
+</html>

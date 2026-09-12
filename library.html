@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Library · The Bob Dylan Fan Guide</title>
+<meta name="description" content="Books and films about Bob Dylan — Chronicles, the major biographies, the criticism, Dont Look Back, No Direction Home, I'm Not There and A Complete Unknown.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">Books &amp; Films</p>
+    <h1>Library</h1>
+    <p class="lede">More has been written about Dylan than about any other popular musician, and a good deal of it is bad. This is the part worth your time.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <section class="section" style="padding-top:0">
+    <div class="sec-head"><h2>Where to start</h2></div>
+    <div class="grid grid-3">
+      <div class="card"><h3>One book</h3><p><strong>Chronicles: Volume One.</strong> His own, and the best-written thing anyone has produced on the subject — even where it is evasive, which is often.</p></div>
+      <div class="card"><h3>One biography</h3><p><strong>Robert Shelton, No Direction Home.</strong> By the critic who discovered him, with access nobody else had. Heylin is more complete; Shelton is better company.</p></div>
+      <div class="card"><h3>One film</h3><p><strong>Dont Look Back.</strong> Ninety-six minutes of 1965 with no commentary and no hindsight. Nothing else gets that close.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>Books</h2></div>
+    <div id="books-mount"></div>
+  </section>
+
+  <section class="section">
+    <div class="sec-head"><h2>Films</h2></div>
+    <div id="films-mount"></div>
+  </section>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.books,
+  mount: '#books-mount',
+  facetField: 'kind',
+  countNoun: 'books',
+  searchFields: ['title', 'author', 'note', 'kind', 'year'],
+  render: function (rows) {
+    return rows.map(function (b) {
+      return '<article class="entry"><h3>' + esc(b.title) + '</h3>' +
+        '<div class="entry-meta"><span>' + esc(b.author) + '</span><span class="dot">&middot;</span><span>' + esc(b.year) + '</span><span class="dot">&middot;</span><span>' + esc(b.kind) + '</span></div>' +
+        '<p>' + esc(b.note) + '</p></article>';
+    }).join('');
+  }
+});
+
+DYLAN.filterList({
+  data: DYLAN.films,
+  mount: '#films-mount',
+  facetField: 'kind',
+  countNoun: 'films',
+  searchFields: ['title', 'director', 'note', 'kind', 'year'],
+  render: function (rows) {
+    return rows.map(function (f) {
+      return '<article class="entry"><h3>' + esc(f.title) + '</h3>' +
+        '<div class="entry-meta"><span>' + esc(f.year) + '</span><span class="dot">&middot;</span><span>dir. ' + esc(f.director) + '</span><span class="dot">&middot;</span><span>' + esc(f.kind) + '</span></div>' +
+        '<p>' + esc(f.note) + '</p></article>';
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

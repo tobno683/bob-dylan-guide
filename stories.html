@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stories &amp; Legends · The Bob Dylan Fan Guide</title>
+<meta name="description" content="The best Bob Dylan anecdotes and the arguments behind them — Judas at Manchester, the axe at Newport, Soy Bomb, the police stop in New Jersey, and the myths that refuse to die.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">Anecdotes &amp; Disputed History</p>
+    <h1>Stories &amp; Legends</h1>
+    <p class="lede">Sixty-five years of secondhand accounts, contested memories and things that are probably true. Where the record is genuinely unclear, this page says so rather than picking the better story.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <div id="stories-mount"></div>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.stories,
+  mount: '#stories-mount',
+  facetField: 'tag',
+  countNoun: 'stories',
+  searchFields: ['title', 'body', 'when', 'tag'],
+  render: function (rows) {
+    return rows.map(function (s) {
+      return '<article class="entry"><h3>' + esc(s.title) + '</h3>' +
+        '<div class="entry-meta"><span>' + esc(s.when) + '</span></div>' +
+        '<p>' + esc(s.body) + '</p></article>';
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

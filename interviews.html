@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interviews · The Bob Dylan Fan Guide</title>
+<meta name="description" content="Sixty years of Bob Dylan interviews, press conferences, documentaries and speeches — from Studs Terkel in 1962 to the Nobel lecture and beyond.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">In His Own Words</p>
+    <h1>Interviews</h1>
+    <p class="lede">He is one of the great evaders — but he has talked, and when he does it is usually worth the wait. The major interviews, press conferences, broadcasts and speeches, in order.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <p class="notice">A warning that applies to all of it: Dylan has invented answers, rewritten published interviews before they ran, and contradicted himself deliberately for sixty years. Read everything here as performance as well as testimony.</p>
+  <div id="int-mount"></div>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.interviews,
+  mount: '#int-mount',
+  facetField: 'medium',
+  countNoun: 'entries',
+  searchFields: ['title', 'outlet', 'body', 'quote', 'date', 'medium', 'year'],
+  render: function (rows) {
+    return rows.map(function (i) {
+      return '<article class="entry"><h3>' + esc(i.title) + '</h3>' +
+        '<div class="entry-meta"><span>' + esc(i.date) + '</span><span class="dot">&middot;</span>' +
+        '<span>' + esc(i.outlet) + '</span><span class="dot">&middot;</span><span>' + esc(i.medium) + '</span></div>' +
+        '<p>' + esc(i.body) + '</p>' +
+        (i.quote ? '<blockquote>' + esc(i.quote) + '</blockquote>' : '') +
+        '</article>';
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

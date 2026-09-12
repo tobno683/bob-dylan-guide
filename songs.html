@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Songs · The Bob Dylan Fan Guide</title>
+<meta name="description" content="An annotated index of Bob Dylan's essential songs — where each one came from, what it borrowed, and why it matters.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">The Catalogue</p>
+    <h1>Songs</h1>
+    <p class="lede">He has written well over six hundred. These are the ones you need, with a note on each — the borrowed melody, the misheard lyric, the session accident, the argument that followed.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <p class="notice"><strong>On lyrics:</strong> this guide quotes only short fragments as commentary. The complete official lyrics are at <a href="https://www.bobdylan.com/songs/" rel="noopener">bobdylan.com</a>, which is where they belong.</p>
+  <div id="song-mount"></div>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.songs,
+  mount: '#song-mount',
+  facetField: 'era',
+  countNoun: 'songs',
+  searchFields: ['title', 'album', 'note', 'era', 'year'],
+  render: function (rows) {
+    return '<div class="table-wrap"><table><thead><tr>' +
+      '<th style="width:64px">Year</th><th>Song</th><th style="width:200px">First released on</th><th>Note</th>' +
+      '</tr></thead><tbody>' +
+      rows.map(function (s) {
+        return '<tr><td class="num">' + esc(s.year) + '</td>' +
+          '<td><strong>' + esc(s.title) + '</strong></td>' +
+          '<td style="color:var(--ink-3);font-size:.88rem">' + esc(s.album) + '</td>' +
+          '<td style="color:var(--ink-2)">' + esc(s.note) + '</td></tr>';
+      }).join('') +
+      '</tbody></table></div>';
+  }
+});
+</script>
+</body>
+</html>

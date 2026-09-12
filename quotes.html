@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quotes · The Bob Dylan Fan Guide</title>
+<meta name="description" content="What Bob Dylan actually said — sourced quotations from interviews, press conferences, liner notes, speeches and the Nobel lecture.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <p class="kicker">Sourced Quotations</p>
+    <h1>Quotes</h1>
+    <p class="lede">Spoken and written Dylan, with a source attached to every line. Everything here is something he said or wrote in prose — not a song lyric.</p>
+  </header>
+</div>
+
+<main class="wrap">
+  <p class="notice"><strong>Why no lyrics?</strong> Dylan's song lyrics are under copyright, and a fan site that reprints them is a fan site waiting to be taken down. The official lyrics live at <a href="https://www.bobdylan.com/songs/" rel="noopener">bobdylan.com</a>. Half the quotations misattributed to Dylan online are also lyrics he never wrote, or things he never said — everything on this page has a date and a place.</p>
+  <div id="q-mount"></div>
+</main>
+
+<script src="assets/data/albums.js"></script>
+<script src="assets/data/songs.js"></script>
+<script src="assets/data/timeline.js"></script>
+<script src="assets/data/quotes.js"></script>
+<script src="assets/data/stories.js"></script>
+<script src="assets/data/interviews.js"></script>
+<script src="assets/data/people.js"></script>
+<script src="assets/data/looks.js"></script>
+<script src="assets/data/library.js"></script>
+<script src="assets/data/honors.js"></script>
+<script src="assets/data/tours.js"></script>
+<script src="assets/data/covers.js"></script>
+<script src="assets/data/resources.js"></script>
+<script src="assets/data/eras.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+DYLAN.filterList({
+  data: DYLAN.quotes,
+  mount: '#q-mount',
+  facetField: 'topic',
+  countNoun: 'quotes',
+  searchFields: ['text', 'source', 'topic'],
+  render: function (rows) {
+    return '<div class="quote-masonry">' + rows.map(function (q) {
+      return '<figure class="quote-card"><blockquote>“' + esc(q.text) + '”</blockquote>' +
+        '<cite>' + esc(q.source) + '</cite></figure>';
+    }).join('') + '</div>';
+  }
+});
+</script>
+</body>
+</html>
