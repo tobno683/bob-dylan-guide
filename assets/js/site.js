@@ -37,7 +37,9 @@ window.DYLAN = window.DYLAN || {};
 
   function initTheme() {
     let t = null;
-    try { t = localStorage.getItem('dylan-theme'); } catch (e) { /* storage blocked */ }
+    // Key bumped when dark became the default, so a "light" saved under the
+    // old system-preference behaviour doesn't silently override it.
+    try { t = localStorage.getItem('dylan-theme-2'); } catch (e) { /* storage blocked */ }
     // Dark is the default and the stylesheet already paints it, so only a
     // stored preference for light actually changes anything here.
     document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
@@ -46,7 +48,7 @@ window.DYLAN = window.DYLAN || {};
   function toggleTheme() {
     const now = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', now);
-    try { localStorage.setItem('dylan-theme', now); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('dylan-theme-2', now); } catch (e) { /* ignore */ }
     const b = document.getElementById('theme-btn');
     if (b) b.textContent = now === 'dark' ? '☀' : '☾';
   }

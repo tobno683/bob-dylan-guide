@@ -196,8 +196,11 @@ h1, h2, h3, h4, h5 {
 .hero-banner {
   position: relative;
   width: 100%;
-  aspect-ratio: 1920 / 768;
-  max-height: 66vh;
+  /* Height is set directly rather than derived from aspect-ratio. With
+     aspect-ratio + max-height, a short wide viewport can shrink the width to
+     satisfy the ratio, leaving the banner short of the right edge. */
+  height: clamp(320px, 40vw, 620px);
+  max-height: 72vh;
   overflow: hidden;
   background: #17474c;
 }
@@ -974,7 +977,7 @@ noscript .notice { display: block; }
   .hero-stage { grid-template-rows: auto auto; }
   .hero-stage > .hero-banner { grid-row: 1; }
   .hero-stage > .hero-copy { grid-row: 2; }
-  .hero-banner { aspect-ratio: 3 / 2; max-height: none; }
+  .hero-banner { height: clamp(280px, 62vw, 420px); max-height: none; }
   .hero-banner img { object-position: 76% center; }
   .hero-banner::after {
     background: linear-gradient(180deg, rgba(11,40,44,0) 62%, rgba(11,40,44,.3) 100%);
