@@ -1,12 +1,19 @@
 /* Chat endpoint.
  *
- * Leave this empty and the chat button does not appear at all — the site works
- * exactly as before. Fill it in with your deployed Worker URL to switch the
- * chat on across every page:
+ * "/api/chat" is the Cloudflare Pages Function in functions/api/chat.ts, served
+ * from the site's own origin — so there is no CORS to configure and no URL to
+ * keep in sync. It deploys automatically with the site on every push.
  *
- *   window.DYLAN_CHAT = { endpoint: "https://dylan-guide-chat.<subdomain>.workers.dev" };
+ * Note this only resolves on the Cloudflare Pages deployment. The GitHub Pages
+ * copy has no server side, so the chat there will report that it can't reach
+ * the service. To run chat on both, put the absolute Cloudflare URL here
+ * instead — "https://bob-dylan-guide.pages.dev/api/chat" — and add CORS
+ * headers for the GitHub origin in the function.
  *
- * There is deliberately no API key here. This file is public; the key lives in
- * the Worker as a secret. See worker/README.md.
+ * Set this to "" to switch the chat off entirely; the button then never
+ * renders and the site is unchanged.
+ *
+ * There is deliberately no API key here. This file is public; the key is an
+ * encrypted secret on the Pages project. See functions/README.md.
  */
-window.DYLAN_CHAT = { endpoint: "" };
+window.DYLAN_CHAT = { endpoint: "/api/chat" };

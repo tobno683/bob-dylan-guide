@@ -1,0 +1,19 @@
+{
+  "name": "bob-dylan-guide",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Dependencies for the Cloudflare Pages Function in functions/. The site itself is plain static HTML and needs no build step.",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.72.0"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^3.99.0"
+  },
+  "//": "wrangler pinned to 3.x: v4 requires Node >=22 and this machine runs 20.11. Cloudflare's own build servers are unaffected.",
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "typecheck": "tsc --noEmit"
+  }
+}

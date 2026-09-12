@@ -1,11 +1,14 @@
-﻿.DS_Store
+.DS_Store
 Thumbs.db
 desktop.ini
 *.log
 .vscode/
 .idea/
 
-# worker
-worker/node_modules/
-worker/.wrangler/
+# Pages Function build + deps
+node_modules/
+.wrangler/
+
+# local secrets for `wrangler pages dev` — never commit
 .dev.vars
+.dev.vars.*
