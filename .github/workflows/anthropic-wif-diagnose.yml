@@ -1,0 +1,72 @@
+# Diagnostic only. Sends the token exchange several times, corrupting one
+# identifier at a time. Anthropic returns a generic "Authentication failed"
+# for everything, so the useful signal is which variants produce a DIFFERENT
+# response from the control — that isolates the field actually being rejected.
+# Manual trigger only; delete once the federation rule works.
+name: anthropic-wif-diagnose
+on:
+  workflow_dispatch:
+permissions:
+  id-token: write
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch GitHub OIDC token
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const token = await core.getIDToken('https://api.anthropic.com');
+            core.setSecret(token);
+            core.exportVariable('JWT', token);
+
+      - name: Fetch a token with the default audience too
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const token = await core.getIDToken();
+            core.setSecret(token);
+            core.exportVariable('JWT_DEFAULT_AUD', token);
+
+      - name: Probe the exchange
+        env:
+          RULE: fdrl_01TU9vWvFJZDGCmmBCrTCMwF
+          ORG: 56b4c4e0-be93-4d89-85bd-3a131a140b13
+          SVC: svac_012y3SzddUTzuPTbfgJz1nJg
+          WRK: wrkspc_015XvKcwxHtnRXyrJDUZ8dQ1
+        run: |
+          set -uo pipefail
+
+          probe () {
+            local label="$1" body="$2"
+            local out="$RUNNER_TEMP/out.json"
+            local code
+            code=$(printf '%s' "$body" | curl -sS -o "$out" -w '%{http_code}' \
+              https://api.anthropic.com/v1/oauth/token \
+              -H "content-type: application/json" --data @-)
+            printf '\n=== %s -> HTTP %s ===\n' "$label" "$code"
+            jq -c 'if type=="object" then with_entries(if (.key|test("token$")) then .value="<redacted>" else . end) else . end' \
+              "$out" 2>/dev/null || cat "$out"
+            sleep 2
+          }
+
+          mk () { # mk <assertion> <rule> <org> <svc> <wrk>
+            jq -n --arg a "$1" --arg r "$2" --arg o "$3" --arg s "$4" --arg w "$5" \
+              '{grant_type:"urn:ietf:params:oauth:grant-type:jwt-bearer",
+                assertion:$a, federation_rule_id:$r, organization_id:$o,
+                service_account_id:$s, workspace_id:$w}'
+          }
+
+          probe "control (everything as issued)"      "$(mk "$JWT" "$RULE" "$ORG" "$SVC" "$WRK")"
+          probe "bogus federation_rule_id"            "$(mk "$JWT" "fdrl_00000000000000000000000000" "$ORG" "$SVC" "$WRK")"
+          probe "bogus organization_id"               "$(mk "$JWT" "$RULE" "00000000-0000-0000-0000-000000000000" "$SVC" "$WRK")"
+          probe "bogus service_account_id"            "$(mk "$JWT" "$RULE" "$ORG" "svac_00000000000000000000000" "$WRK")"
+          probe "bogus workspace_id"                  "$(mk "$JWT" "$RULE" "$ORG" "$SVC" "wrkspc_0000000000000000000000")"
+          probe "garbage assertion"                   "$(mk "not-a-jwt" "$RULE" "$ORG" "$SVC" "$WRK")"
+          probe "assertion with GitHub default aud"   "$(mk "$JWT_DEFAULT_AUD" "$RULE" "$ORG" "$SVC" "$WRK")"
+
+          echo
+          echo "Read the results by comparing each variant against the control."
+          echo "A variant that returns the SAME error as the control means that"
+          echo "field is not what the server rejected first."
