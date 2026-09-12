@@ -1,5 +1,7 @@
 name: anthropic-wif-test
-on: push
+on:
+  push:
+  workflow_dispatch:
 permissions:
   id-token: write
   contents: read
@@ -14,11 +16,24 @@ jobs:
             const token = await core.getIDToken('https://api.anthropic.com');
             core.setSecret(token);
             core.exportVariable('JWT', token);
+
+            // Claims are public metadata, not credentials — printing them shows
+            // exactly what the federation rule has to be configured to accept.
+            const claims = JSON.parse(
+              Buffer.from(token.split('.')[1], 'base64url').toString('utf8')
+            );
+            core.info('OIDC claims presented to Anthropic:');
+            for (const k of ['iss', 'aud', 'sub', 'repository', 'repository_owner',
+                             'ref', 'ref_type', 'workflow_ref', 'job_workflow_ref',
+                             'environment']) {
+              if (claims[k] !== undefined) core.info(`  ${k} = ${claims[k]}`);
+            }
+
       - name: Exchange for an Anthropic access token
         run: |
-          curl -sS https://api.anthropic.com/v1/oauth/token \
-            -H "content-type: application/json" \
-            --data @- <<JSON | jq 'with_entries(if (.key | test("token$")) then .value = "<redacted>" else . end)'
+          set -euo pipefail
+
+          cat > "$RUNNER_TEMP/req.json" <<JSON
           {
             "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
             "assertion": "$JWT",
@@ -28,3 +43,20 @@ jobs:
             "workspace_id": "wrkspc_015XvKcwxHtnRXyrJDUZ8dQ1"
           }
           JSON
+
+          code=$(curl -sS -o "$RUNNER_TEMP/resp.json" -w '%{http_code}' \
+            https://api.anthropic.com/v1/oauth/token \
+            -H "content-type: application/json" \
+            --data @"$RUNNER_TEMP/req.json")
+
+          # redact anything whose key ends in "token" before it reaches the log
+          jq 'with_entries(if (.key | test("token$")) then .value = "<redacted>" else . end)' \
+            "$RUNNER_TEMP/resp.json"
+
+          # curl's exit code is not enough here: the API returns its errors as a
+          # 4xx with a JSON body, and piping into jq would mask the failure.
+          if [ "$code" != "200" ]; then
+            echo "::error::Token exchange failed with HTTP $code"
+            exit 1
+          fi
+          echo "Token exchange succeeded (HTTP $code)"
