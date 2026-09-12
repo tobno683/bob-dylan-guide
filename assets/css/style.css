@@ -47,6 +47,12 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
+/* The browser's own [hidden] rule is display:none, but any author rule that
+   sets display — .chat-panel{display:flex}, say — silently beats it, and the
+   element stays on screen while el.hidden reads true. Guard it globally so
+   toggling .hidden always works. */
+[hidden] { display: none !important; }
+
 html { scroll-behavior: smooth; }
 
 body {
