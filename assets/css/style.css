@@ -180,35 +180,71 @@ h1, h2, h3, h4, h5 {
 /* ---------- hero ---------- */
 
 .hero {
-  padding: 60px 0 48px;
+  padding: 0 0 46px;
   border-bottom: 3px double var(--rule);
-  text-align: center;
   position: relative;
 }
+
+/* banner and copy share one grid cell on desktop, stack on mobile */
+.hero-stage { display: grid; }
+.hero-stage > * { grid-column: 1; grid-row: 1; }
+
+.hero-banner {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1920 / 768;
+  max-height: 66vh;
+  overflow: hidden;
+  background: #17474c;
+}
+.hero-banner img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 85% center;
+  display: block;
+}
+/* scrim from the artwork's own teal, so type stays readable over the sky */
+.hero-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg,
+    rgba(11, 40, 44, .84) 0%,
+    rgba(11, 40, 44, .62) 30%,
+    rgba(11, 40, 44, .14) 56%,
+    rgba(11, 40, 44, 0) 74%);
+}
+
+.hero-copy { display: flex; align-items: center; z-index: 2; pointer-events: none; }
+.hero-copy .wrap { pointer-events: auto; width: 100%; text-align: left; }
+
 .hero .kicker {
   font-size: .7rem;
   letter-spacing: .34em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 20px;
+  color: #e8a85f;
+  margin: 0 0 16px;
 }
 .hero h1 {
-  font-size: clamp(2.8rem, 9vw, 6.5rem);
-  margin: 0 0 .1em;
+  font-size: clamp(2.6rem, 7.4vw, 5.6rem);
+  margin: 0;
   letter-spacing: -.035em;
   line-height: .92;
+  color: #f7eeda;
+  text-shadow: 0 2px 34px rgba(0, 0, 0, .5);
 }
 .hero .lede {
-  font-size: clamp(1.02rem, 2vw, 1.22rem);
-  color: var(--ink-2);
-  max-width: 640px;
-  margin: 18px auto 0;
+  font-size: clamp(1rem, 1.7vw, 1.18rem);
+  color: #e4d9c3;
+  max-width: 470px;
+  margin: 0;
   font-style: italic;
+  text-shadow: 0 1px 18px rgba(0, 0, 0, .55);
 }
 .hero-rule {
   width: 90px; height: 2px;
-  background: var(--accent);
-  margin: 26px auto;
+  background: #d98d3a;
+  margin: 22px 0;
 }
 
 .hero-stats {
@@ -216,7 +252,7 @@ h1, h2, h3, h4, h5 {
   justify-content: center;
   flex-wrap: wrap;
   gap: 0;
-  margin-top: 34px;
+  margin-top: 42px;
 }
 .hero-stats .stat { padding: 0 26px; border-left: 1px solid var(--rule); }
 .hero-stats .stat:first-child { border-left: 0; }
@@ -927,6 +963,24 @@ noscript .notice { display: block; }
   .nav a { padding: 10px 6px; border-bottom: 1px solid var(--rule-soft); }
   .masthead-inner { position: relative; }
   .nav-tools { margin-left: auto; }
+}
+
+/* below this width the banner is too short to hold type — stack instead of overlay */
+@media (max-width: 760px) {
+  .hero-stage { grid-template-rows: auto auto; }
+  .hero-stage > .hero-banner { grid-row: 1; }
+  .hero-stage > .hero-copy { grid-row: 2; }
+  .hero-banner { aspect-ratio: 3 / 2; max-height: none; }
+  .hero-banner img { object-position: 76% center; }
+  .hero-banner::after {
+    background: linear-gradient(180deg, rgba(11,40,44,0) 62%, rgba(11,40,44,.3) 100%);
+  }
+  .hero-copy { padding-top: 30px; }
+  .hero-copy .wrap { text-align: center; }
+  .hero .kicker { color: var(--accent); }
+  .hero h1 { color: var(--ink); text-shadow: none; }
+  .hero .lede { color: var(--ink-2); text-shadow: none; max-width: none; margin: 0 auto; }
+  .hero-rule { margin: 20px auto; background: var(--accent); }
 }
 
 @media (max-width: 620px) {

@@ -100,7 +100,7 @@ Push to GitHub and enable Pages on the default branch, root folder. `.nojekyll` 
 ## Scope and limitations
 
 - **No lyrics.** Dylan's lyrics are under copyright. This guide quotes only short fragments as commentary and links to the official lyrics at [bobdylan.com](https://www.bobdylan.com/songs/).
-- **No photographs.** The images are owned by the photographers who took them. The style page describes the looks rather than reproducing them.
+- **No photographs.** Press and album photography is owned by the photographers who took it, so the style page describes the looks rather than reproducing them. The one image on the site is the illustrated header banner (`assets/img/dylan-header.png`), supplied by the site owner.
 - **The song index is selective**, not complete. He has written more than 600 songs; this covers the ones that matter with a note on each.
 - **Tour dates go stale.** Anything current should be checked against [bobdylan.com/on-tour](https://www.bobdylan.com/on-tour/).
 - **Some facts are genuinely disputed** — often because Dylan disputed them himself. Where that's true, the guide says so instead of picking the better story.
