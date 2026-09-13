@@ -21,8 +21,16 @@ interface Env {
   ANTHROPIC_API_KEY: string;
 }
 
-/** Swap to "claude-haiku-4-5" to cut cost roughly fivefold. */
-const MODEL = "claude-opus-5";
+/* Sonnet rather than Opus for cost, and rather than Haiku for accuracy.
+   This widget answers knowledge questions about a subject whose record is
+   full of half-truths, and the system prompt below spends most of its length
+   telling it to say "nobody agrees" instead of picking the better story.
+   Anthropic's own figures put Haiku 4.5 at roughly a tenth of Opus 5's cost
+   per knowledge question but 63% accurate against 92% — on this workload that
+   trade buys confident wrong answers about Dylan, which is the one thing the
+   rest of the site is built to avoid. Sonnet 5 is documented as near-Opus on
+   quality and supports the effort setting below; only Haiku rejects `max`. */
+const MODEL = "claude-sonnet-5";
 
 /** Chat bubbles want short answers, and this caps the cost of any one call. */
 const MAX_TOKENS = 1024;

@@ -22,7 +22,7 @@ Secrets are write-only once saved — you rotate rather than recover. If the fun
 
 ## Cost — read before leaving it public
 
-Defaults to **Claude Opus 5** ($5 per million input tokens, $25 per million output). Anyone who finds the site can spend your money.
+Runs on **Claude Sonnet 5**. Anyone who finds the site can spend your money.
 
 Three things limit the damage:
 
@@ -32,11 +32,13 @@ Three things limit the damage:
 | `output_config.effort: "low"` | chat isn't reasoning-heavy; the documented cost lever |
 | `cache_control` on the system prompt | the long stable prefix is read from cache on repeat traffic |
 
-To cut it roughly fivefold, change one line in `api/chat.ts`:
+It started on Claude Opus 5 ($5/$25 per MTok) and moved to Sonnet 5 for cost. Haiku 4.5 is cheaper again — roughly a tenth of Opus 5 per knowledge question — but Anthropic measure it at 63% accuracy against Opus 5's 92% on that workload, and this widget answers knowledge questions about a subject whose record is full of half-truths. That trade buys confident wrong answers about Dylan, which is what the rest of the site exists to avoid. Change it only if you decide the chat is a toy:
 
 ```ts
 const MODEL = "claude-haiku-4-5";
 ```
+
+Note that `output_config.effort` stays valid there — only the `max` level errors on Haiku 4.5, and this code sends `low`.
 
 **Set a spend limit in the Anthropic console regardless.** That is the only hard backstop; everything else here is a speed bump.
 
