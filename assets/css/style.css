@@ -185,7 +185,44 @@ h1, h2, h3, h4, h5 {
 }
 .icon-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-.nav-toggle { display: none; }
+/* On a phone this is the only way around the site, so it is not another
+   anonymous icon square next to search and theme — it carries a word, it is
+   tinted with the accent, and it inverts while the panel is open. */
+.nav-toggle {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 13px;
+  border: 1px solid var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: 'Oswald', sans-serif;
+  font-size: .7rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.nav-toggle-icon { font-size: .9rem; line-height: 1; }
+.nav-toggle[aria-expanded="true"] { background: var(--accent); color: #fff; }
+:root:not([data-theme="light"]) .nav-toggle[aria-expanded="true"] { color: #17140f; }
+
+/* section heading inside the flattened mobile menu; the desktop dropdown is
+   its own affordance and does not need it */
+.nav-group-label {
+  display: none;
+  font-family: 'Oswald', sans-serif;
+  font-size: .58rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 18px 18px 7px;
+  border-top: 1px solid var(--rule);
+  margin-top: 8px;
+}
 
 /* ---------- hero ---------- */
 
@@ -1454,7 +1491,9 @@ noscript .notice { display: block; }
 @media (max-width: 940px) {
   .quote-masonry { columns: 1; }
   .look-masonry { columns: 1; }
-  .nav-toggle { display: grid; }
+  /* thumb-sized: 34px is fine for a mouse, short for a finger */
+  .nav-toggle { display: inline-flex; height: 40px; padding: 0 15px; }
+  .nav-tools .icon-btn { width: 40px; height: 40px; }
   .nav {
     display: none;
     position: absolute;
@@ -1463,12 +1502,46 @@ noscript .notice { display: block; }
     border-bottom: 3px double var(--rule);
     flex-direction: column;
     align-items: stretch;
-    padding: 10px 18px 16px;
+    /* .nav is flex-wrap:wrap for the desktop bar. Left on in a column with a
+       max-height, flexbox wraps the overflow into a SECOND COLUMN on top of
+       the first instead of scrolling — so it has to be turned off here. */
+    flex-wrap: nowrap;
+    padding: 6px 0 12px;
     gap: 0;
     box-shadow: var(--shadow);
+    max-height: calc(100vh - 56px);
+    overflow-y: auto;
   }
   .nav.open { display: flex; }
-  .nav a { padding: 10px 6px; border-bottom: 1px solid var(--rule-soft); }
+  .nav a {
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: .82rem;
+    letter-spacing: .1em;
+  }
+  /* where you are, stated plainly rather than as a faint tint */
+  .nav a.active {
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    padding-left: 15px;
+  }
+  /* Flatten the More dropdown. Vertical space is free in a panel you scroll,
+     so hiding half the site behind a second tap buys nothing. */
+  .nav .dropdown { display: contents; }
+  .nav .drop-btn { display: none; }
+  .nav .drop-menu {
+    display: block;
+    position: static;
+    min-width: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    z-index: auto;
+  }
+  .nav .drop-menu a { padding: 13px 18px; border-bottom: 1px solid var(--rule-soft); }
+  .nav-group-label { display: block; }
   .masthead-inner { position: relative; }
   .nav-tools { margin-left: auto; }
 }

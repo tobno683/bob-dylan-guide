@@ -84,13 +84,13 @@ window.DYLAN = window.DYLAN || {};
             ${PRIMARY.map(link).join('')}
             <div class="dropdown${moreActive ? ' active-parent' : ''}">
               <button class="drop-btn${moreActive ? ' active' : ''}" id="more-btn" aria-expanded="false">More <span aria-hidden="true">▾</span></button>
-              <div class="drop-menu" id="more-menu">${MORE.map(link).join('')}</div>
+              <div class="drop-menu" id="more-menu"><span class="nav-group-label">More of the guide</span>${MORE.map(link).join('')}</div>
             </div>
           </nav>
           <div class="nav-tools">
             <button class="icon-btn" id="search-btn" title="Search everything (press /)" aria-label="Search">⌕</button>
             <button class="icon-btn" id="theme-btn" title="Toggle light / dark" aria-label="Toggle theme">☾</button>
-            <button class="icon-btn nav-toggle" id="nav-btn" aria-label="Menu">☰</button>
+            <button class="nav-toggle" id="nav-btn" aria-expanded="false" aria-controls="nav"><span class="nav-toggle-icon" aria-hidden="true">☰</span><span class="nav-toggle-label">Menu</span></button>
           </div>
         </div>
       </header>`;
@@ -214,8 +214,29 @@ window.DYLAN = window.DYLAN || {};
       document.documentElement.getAttribute('data-theme') === 'dark' ? '☀' : '☾';
     document.getElementById('theme-btn').addEventListener('click', toggleTheme);
 
-    document.getElementById('nav-btn').addEventListener('click', () =>
-      document.getElementById('nav').classList.toggle('open'));
+    /* The mobile panel carries every page, so it is the only way around the
+       site on a phone — it needs to say what it is and to close predictably. */
+    const navBtn = document.getElementById('nav-btn');
+    const navEl = document.getElementById('nav');
+    const navLabel = navBtn.querySelector('.nav-toggle-label');
+    const navIcon = navBtn.querySelector('.nav-toggle-icon');
+
+    function setNav(open) {
+      navEl.classList.toggle('open', open);
+      navBtn.setAttribute('aria-expanded', String(open));
+      navLabel.textContent = open ? 'Close' : 'Menu';
+      navIcon.textContent = open ? '✕' : '☰';
+    }
+
+    navBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setNav(!navEl.classList.contains('open'));
+    });
+    // tapping the page behind the panel should dismiss it, the way every other
+    // menu on a phone does
+    document.addEventListener('click', (e) => {
+      if (navEl.classList.contains('open') && !navEl.contains(e.target)) setNav(false);
+    });
 
     const moreBtn = document.getElementById('more-btn');
     const moreMenu = document.getElementById('more-menu');
@@ -242,7 +263,7 @@ window.DYLAN = window.DYLAN || {};
 
     document.addEventListener('keydown', (e) => {
       const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
-      if (e.key === 'Escape') closeSearch();
+      if (e.key === 'Escape') { closeSearch(); setNav(false); }
       if (e.key === '/' && !typing) { e.preventDefault(); openSearch(); }
     });
 
