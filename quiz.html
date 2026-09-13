@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz · The Bob Dylan Fan Guide</title>
+<meta name="description" content="Twenty hard Bob Dylan questions, a new set on the first of every month, and a leaderboard that starts empty each time.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=2026091404">
+</head>
+<body>
+
+<div class="page-stage">
+  <div class="page-banner">
+    <img src="assets/img/page-header.png?v=2026091404" width="1920" height="640" alt=""
+         fetchpriority="high" decoding="async">
+  </div>
+  <div class="page-copy">
+    <div class="wrap">
+      <header class="page-head">
+        <p class="kicker">Twenty Questions</p>
+        <h1>The Monthly Quiz</h1>
+        <p class="lede">Twenty questions written for people who already know the easy ones. A new set appears on the first of every month, and the leaderboard starts empty again with it.</p>
+      </header>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+  <div class="quiz-layout">
+
+    <div>
+      <section class="quiz-stage" id="stage"></section>
+    </div>
+
+    <aside class="quiz-side">
+      <div class="sec-head"><h2>This month</h2><span class="count" id="board-month"></span></div>
+      <div id="board"><p class="empty">Loading the board…</p></div>
+      <p class="board-foot" id="board-foot"></p>
+    </aside>
+
+  </div>
+</main>
+
+<script src="assets/data/albums.js?v=2026091404"></script>
+<script src="assets/data/songs.js?v=2026091404"></script>
+<script src="assets/data/timeline.js?v=2026091404"></script>
+<script src="assets/data/quotes.js?v=2026091404"></script>
+<script src="assets/data/stories.js?v=2026091404"></script>
+<script src="assets/data/interviews.js?v=2026091404"></script>
+<script src="assets/data/people.js?v=2026091404"></script>
+<script src="assets/data/looks.js?v=2026091404"></script>
+<script src="assets/data/library.js?v=2026091404"></script>
+<script src="assets/data/honors.js?v=2026091404"></script>
+<script src="assets/data/tours.js?v=2026091404"></script>
+<script src="assets/data/covers.js?v=2026091404"></script>
+<script src="assets/data/resources.js?v=2026091404"></script>
+<script src="assets/data/eras.js?v=2026091404"></script>
+<script src="assets/data/quiz.js?v=2026091404"></script>
+<script src="assets/js/site.js?v=2026091404"></script>
+<script src="assets/js/chat-config.js?v=2026091404"></script>
+<script src="assets/js/chat.js?v=2026091404"></script>
+<script>
+DYLAN.chrome();
+var esc = DYLAN.esc;
+
+/* ============================================================
+   Which set is live
+   ============================================================ */
+
+function monthKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+var THIS_MONTH = monthKey(new Date());
+
+/* The set for the current month if one exists, otherwise the newest set that
+   isn't in the future. The fallback matters: if a month ever goes by without
+   new questions being written, the page should quietly serve the most recent
+   set rather than showing nothing. */
+function activeSet() {
+  var sets = (DYLAN.quiz || []).slice().sort(function (a, b) {
+    return a.month < b.month ? -1 : a.month > b.month ? 1 : 0;
+  });
+  if (!sets.length) return null;
+
+  var exact = null, latestPast = null;
+  sets.forEach(function (s) {
+    if (s.month === THIS_MONTH) exact = s;
+    if (s.month <= THIS_MONTH) latestPast = s;
+  });
+  return exact || latestPast || sets[0];
+}
+
+var SET = activeSet();
+var Q = SET ? SET.questions : [];
+
+var MONTH_NAMES = ['January','February','March','April','May','June',
+                   'July','August','September','October','November','December'];
+
+function prettyMonth(key) {
+  var p = String(key).split('-');
+  return MONTH_NAMES[(+p[1]) - 1] + ' ' + p[0];
+}
+
+/* ============================================================
+   Play state
+   ============================================================ */
+
+var state = {
+  order: [],        // question indices, shuffled
+  options: [],      // per question: shuffled option indices
+  answers: [],      // per question: the option the player picked, or null
+  at: 0,
+  startedAt: 0,
+  finishedAt: 0,
+  submitted: false
+};
+
+function shuffled(n) {
+  var a = [];
+  for (var i = 0; i < n; i++) a.push(i);
+  for (var j = a.length - 1; j > 0; j--) {
+    var k = Math.floor(Math.random() * (j + 1));
+    var t = a[j]; a[j] = a[k]; a[k] = t;
+  }
+  return a;
+}
+
+function beginPlay() {
+  state.order = shuffled(Q.length);
+  // Options are shuffled per play, so the answer's position in the data file
+  // carries no signal and a second run isn't a memory test of positions.
+  state.options = Q.map(function (q) { return shuffled(q.a.length); });
+  state.answers = Q.map(function () { return null; });
+  state.at = 0;
+  state.startedAt = Date.now();
+  state.finishedAt = 0;
+  state.submitted = false;
+  renderPlaying();
+}
+
+function score() {
+  var n = 0;
+  state.order.forEach(function (qi, step) {
+    if (state.answers[step] === Q[qi].c) n++;
+  });
+  return n;
+}
+
+function elapsed() {
+  return Math.max(1, Math.round(((state.finishedAt || Date.now()) - state.startedAt) / 1000));
+}
+
+function clock(sec) {
+  var m = Math.floor(sec / 60), s = sec % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+/* ============================================================
+   Screens
+   ============================================================ */
+
+var stage = document.getElementById('stage');
+
+function renderIntro() {
+  if (!Q.length) {
+    stage.innerHTML = '<div class="quiz-card"><p class="empty">No questions are loaded.</p></div>';
+    return;
+  }
+
+  var best = readBest();
+  var stale = SET.month !== THIS_MONTH;
+
+  stage.innerHTML =
+    '<div class="quiz-card quiz-intro">' +
+      '<p class="kicker">' + esc(prettyMonth(SET.month)) + ' &middot; ' + Q.length + ' questions</p>' +
+      '<h2>' + esc(SET.title) + '</h2>' +
+      '<p>Four options, no going back, no clues. Every answer comes with the story behind it, so a wrong one is still worth something. The clock runs from the first question to the last and breaks ties on the board.</p>' +
+      (stale ? '<p class="quiz-warn">This is the ' + esc(prettyMonth(SET.month)) + ' set — a new one for ' + esc(prettyMonth(THIS_MONTH)) + ' hasn’t been written yet.</p>' : '') +
+      (best ? '<p class="quiz-best">Your best this month: <strong>' + best.score + '/' + best.total + '</strong> in ' + clock(best.seconds) + '.</p>' : '') +
+      '<button class="qbtn qbtn-go" id="start">Start the quiz</button>' +
+      '<p class="quiz-fine">Answers live in a public file, because the quiz runs in your browser — the board is an honour system. Play it straight; it’s more fun.</p>' +
+    '</div>';
+
+  document.getElementById('start').addEventListener('click', beginPlay);
+}
+
+function renderPlaying() {
+  var step = state.at;
+  var qi = state.order[step];
+  var q = Q[qi];
+  var picked = state.answers[step];
+  var answered = picked !== null;
+  var pct = Math.round((step / Q.length) * 100);
+
+  var opts = state.options[qi].map(function (oi) {
+    var cls = 'qopt';
+    if (answered) {
+      if (oi === q.c) cls += ' right';
+      else if (oi === picked) cls += ' wrong';
+      else cls += ' dim';
+    }
+    return '<button class="' + cls + '" data-opt="' + oi + '"' + (answered ? ' disabled' : '') + '>' +
+      '<span class="qopt-mark" aria-hidden="true"></span>' +
+      '<span class="qopt-text">' + esc(q.a[oi]) + '</span>' +
+      '</button>';
+  }).join('');
+
+  stage.innerHTML =
+    '<div class="quiz-card">' +
+      '<div class="qbar"><i style="width:' + pct + '%"></i></div>' +
+      '<div class="qhead">' +
+        '<span>Question ' + (step + 1) + ' of ' + Q.length + '</span>' +
+        '<span id="qclock">' + clock(elapsed()) + '</span>' +
+      '</div>' +
+      '<h2 class="qtext">' + esc(q.q) + '</h2>' +
+      '<div class="qopts">' + opts + '</div>' +
+      (answered
+        ? '<div class="qnote' + (picked === q.c ? ' ok' : '') + '">' +
+            '<strong>' + (picked === q.c ? 'Correct.' : 'No — ' + esc(q.a[q.c]) + '.') + '</strong> ' +
+            esc(q.note) +
+          '</div>' +
+          '<button class="qbtn qbtn-go" id="next">' +
+            (step + 1 < Q.length ? 'Next question' : 'See how you did') +
+          '</button>'
+        : '') +
+    '</div>';
+
+  if (!answered) {
+    stage.querySelectorAll('.qopt').forEach(function (b) {
+      b.addEventListener('click', function () {
+        state.answers[step] = +b.dataset.opt;
+        renderPlaying();
+      });
+    });
+  } else {
+    document.getElementById('next').addEventListener('click', function () {
+      if (step + 1 < Q.length) { state.at++; renderPlaying(); }
+      else { state.finishedAt = Date.now(); renderResult(); }
+    });
+  }
+
+  tickClock();
+}
+
+/* One interval for the life of the page rather than one per question — a new
+   interval per render leaks them, and the clock is only cosmetic anyway. */
+var clockTimer = null;
+function tickClock() {
+  if (clockTimer) return;
+  clockTimer = setInterval(function () {
+    var el = document.getElementById('qclock');
+    if (!el || state.finishedAt) return;
+    el.textContent = clock(elapsed());
+  }, 1000);
+}
+
+function verdict(n, total) {
+  var p = n / total;
+  if (p === 1) return 'Nothing left to teach you.';
+  if (p >= 0.85) return 'Genuinely well read.';
+  if (p >= 0.7) return 'You have done the reading.';
+  if (p >= 0.5) return 'Respectable. The vault is deep.';
+  if (p >= 0.3) return 'There is a lot of Dylan out there.';
+  return 'Start with the biography and come back.';
+}
+
+function renderResult() {
+  var n = score(), sec = elapsed();
+  saveBest(n, Q.length, sec);
+
+  var review = state.order.map(function (qi, step) {
+    var q = Q[qi], picked = state.answers[step], ok = picked === q.c;
+    return '<li class="' + (ok ? 'ok' : 'no') + '">' +
+      '<span class="rv-mark" aria-hidden="true">' + (ok ? '✓' : '✗') + '</span>' +
+      '<div><p class="rv-q">' + esc(q.q) + '</p>' +
+      '<p class="rv-a">' + esc(q.a[q.c]) +
+      (ok ? '' : ' <span class="rv-yours">— you said ' + esc(q.a[picked]) + '</span>') +
+      '</p></div></li>';
+  }).join('');
+
+  stage.innerHTML =
+    '<div class="quiz-card quiz-result">' +
+      '<p class="kicker">' + esc(prettyMonth(SET.month)) + '</p>' +
+      '<div class="score-big">' + n + '<span>/' + Q.length + '</span></div>' +
+      '<p class="score-verdict">' + esc(verdict(n, Q.length)) + ' <span>' + clock(sec) + '</span></p>' +
+
+      '<form class="submit-row" id="submit-row">' +
+        '<label for="pname">Put it on the board</label>' +
+        '<div class="submit-line">' +
+          '<input id="pname" class="search-input" type="text" maxlength="24" autocomplete="nickname" placeholder="Your name" required>' +
+          '<button class="qbtn" type="submit" id="submit-btn">Submit</button>' +
+        '</div>' +
+        '<p class="submit-msg" id="submit-msg"></p>' +
+      '</form>' +
+
+      '<button class="qbtn qbtn-ghost" id="again">Play again</button>' +
+
+      '<h3 class="rv-head">Every question</h3>' +
+      '<ol class="review">' + review + '</ol>' +
+    '</div>';
+
+  var nameInput = document.getElementById('pname');
+  try {
+    var saved = localStorage.getItem('dylan-quiz-name');
+    if (saved) nameInput.value = saved;
+  } catch (e) { /* storage blocked */ }
+
+  document.getElementById('submit-row').addEventListener('submit', function (e) {
+    e.preventDefault();
+    submitScore(nameInput.value, n, Q.length, sec);
+  });
+
+  document.getElementById('again').addEventListener('click', renderIntro);
+}
+
+/* ============================================================
+   Personal best — local, per month, and only ever this browser's
+   ============================================================ */
+
+function bestKey() { return 'dylan-quiz-best-' + SET.month; }
+
+function readBest() {
+  try {
+    var raw = localStorage.getItem(bestKey());
+    if (!raw) return null;
+    var b = JSON.parse(raw);
+    return (typeof b.score === 'number') ? b : null;
+  } catch (e) { return null; }
+}
+
+function saveBest(s, total, sec) {
+  var prev = readBest();
+  if (prev && (prev.score > s || (prev.score === s && prev.seconds <= sec))) return;
+  try {
+    localStorage.setItem(bestKey(), JSON.stringify({ score: s, total: total, seconds: sec }));
+  } catch (e) { /* storage blocked */ }
+}
+
+/* ============================================================
+   The board
+   ============================================================ */
+
+var boardEl = document.getElementById('board');
+var boardFoot = document.getElementById('board-foot');
+var boardMonth = document.getElementById('board-month');
+var mine = null;   // {n,s,t} for the row just submitted, so it can be marked
+
+boardMonth.textContent = prettyMonth(THIS_MONTH);
+
+function renderBoard(rows, configured) {
+  if (!configured) {
+    boardEl.innerHTML = '<p class="empty">The shared board isn’t switched on yet.</p>';
+    boardFoot.textContent = 'Your best score is still kept in this browser.';
+    return;
+  }
+  if (!rows.length) {
+    boardEl.innerHTML = '<p class="empty">Nobody yet this month. Go on.</p>';
+    boardFoot.textContent = 'The board empties on the first of each month, with the new questions.';
+    return;
+  }
+
+  boardEl.innerHTML = '<ol class="board-list">' + rows.map(function (r, i) {
+    var isMine = mine && r.n === mine.n && r.s === mine.s && r.t === mine.t;
+    return '<li' + (isMine ? ' class="you"' : '') + '>' +
+      '<span class="bd-rank">' + (i + 1) + '</span>' +
+      '<span class="bd-name">' + esc(r.n) + '</span>' +
+      '<span class="bd-time">' + clock(r.t) + '</span>' +
+      '<span class="bd-score">' + r.s + '</span>' +
+      '</li>';
+  }).join('') + '</ol>';
+
+  boardFoot.textContent = 'Ties are broken by time. The board empties on the first of each month.';
+}
+
+function loadBoard() {
+  fetch('/api/scores', { headers: { accept: 'application/json' } })
+    .then(function (r) { return r.json(); })
+    .then(function (d) { renderBoard(d.scores || [], d.configured !== false); })
+    .catch(function () {
+      boardEl.innerHTML = '<p class="empty">Couldn’t reach the board.</p>';
+      boardFoot.textContent = '';
+    });
+}
+
+function submitScore(rawName, s, total, sec) {
+  var name = String(rawName || '').trim();
+  var msg = document.getElementById('submit-msg');
+  var btn = document.getElementById('submit-btn');
+
+  if (!name) { msg.textContent = 'Enter a name first.'; msg.className = 'submit-msg bad'; return; }
+  if (state.submitted) { msg.textContent = 'Already on the board.'; msg.className = 'submit-msg'; return; }
+
+  try { localStorage.setItem('dylan-quiz-name', name); } catch (e) { /* ignore */ }
+
+  btn.disabled = true;
+  msg.textContent = 'Sending…';
+  msg.className = 'submit-msg';
+
+  fetch('/api/scores', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: name, score: s, total: total, seconds: sec })
+  })
+    .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+    .then(function (res) {
+      if (!res.ok || !res.d.ok) {
+        btn.disabled = false;
+        msg.textContent = res.d.configured === false
+          ? 'The shared board isn’t switched on yet — your score is saved in this browser.'
+          : (res.d.error || 'That didn’t go through.');
+        msg.className = 'submit-msg bad';
+        return;
+      }
+      state.submitted = true;
+      mine = { n: name, s: s, t: sec };
+      msg.textContent = 'On the board.';
+      msg.className = 'submit-msg good';
+
+      // KV list is eventually consistent, so the row just written may not be
+      // in the response yet. Merge it in locally rather than showing a board
+      // that is visibly missing the score we just confirmed.
+      var rows = (res.d.scores || []).slice();
+      if (!rows.some(function (r) { return r.n === name && r.s === s && r.t === sec; })) {
+        rows.push(mine);
+        rows.sort(function (a, b) { return (b.s - a.s) || (a.t - b.t); });
+        rows = rows.slice(0, 25);
+      }
+      renderBoard(rows, true);
+    })
+    .catch(function () {
+      btn.disabled = false;
+      msg.textContent = 'Couldn’t reach the board.';
+      msg.className = 'submit-msg bad';
+    });
+}
+
+renderIntro();
+loadBoard();
+</script>
+</body>
+</html>

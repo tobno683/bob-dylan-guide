@@ -6,6 +6,12 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "8137"],
       "port": 8137
+    },
+    {
+      "name": "dylan-pages",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "wrangler@3", "pages", "dev", ".", "--port", "8788", "--kv", "QUIZ_SCORES"],
+      "port": 8788
     }
   ]
 }

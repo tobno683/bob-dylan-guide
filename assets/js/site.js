@@ -17,6 +17,7 @@ window.DYLAN = window.DYLAN || {};
   ];
 
   const MORE = [
+    ['quiz.html', 'Quiz'],
     ['interviews.html', 'Interviews'],
     ['quotes.html', 'Quotes'],
     ['style.html', 'Style'],
@@ -58,8 +59,14 @@ window.DYLAN = window.DYLAN || {};
   /* ---------- chrome ---------- */
 
   function currentPage() {
-    const p = location.pathname.split('/').pop();
-    return p === '' ? 'index.html' : p;
+    let p = location.pathname.split('/').pop();
+    if (p === '') return 'index.html';
+    // Cloudflare Pages serves /timeline, not /timeline.html — it 308s the
+    // extension away. The nav's hrefs keep the .html (they have to work from
+    // the filesystem and from GitHub Pages too), so without this the two
+    // never matched and no nav item was ever highlighted on the live site.
+    if (p.indexOf('.') === -1) p += '.html';
+    return p;
   }
 
   function navHTML(active) {
@@ -98,7 +105,7 @@ window.DYLAN = window.DYLAN || {};
           <div class="footer-grid">
             ${col('The Work', [['discography.html', 'Discography'], ['songs.html', 'Song index'], ['covers.html', 'Great covers'], ['tours.html', 'Touring history']])}
             ${col('The Life', [['biography.html', 'Biography'], ['timeline.html', 'Timeline'], ['people.html', 'People'], ['honors.html', 'Awards & honors']])}
-            ${col('The Words', [['interviews.html', 'Interviews'], ['quotes.html', 'Quotations'], ['stories.html', 'Stories & legends'], ['library.html', 'Books & films']])}
+            ${col('The Words', [['interviews.html', 'Interviews'], ['quotes.html', 'Quotations'], ['stories.html', 'Stories & legends'], ['library.html', 'Books & films'], ['quiz.html', 'Monthly quiz']])}
             ${col('Elsewhere', [['resources.html', 'Fan resources'], ['https://www.bobdylan.com/', 'bobdylan.com'], ['https://www.bobdylancenter.com/', 'Bob Dylan Center'], ['https://www.bobdylan.com/on-tour/', 'Tour dates']])}
           </div>
           <div class="colophon">

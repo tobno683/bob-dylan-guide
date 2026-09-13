@@ -75,3 +75,76 @@ npx --yes wrangler@3 pages dev .
 Put `ANTHROPIC_API_KEY=sk-ant-...` in `.dev.vars` at the repo root (already gitignored). Site and function both come up on `http://localhost:8788`.
 
 Pin to wrangler 3 — v4 requires Node ≥22. Cloudflare's own build servers are unaffected by that.
+
+---
+
+# Quiz leaderboard
+
+`api/scores.ts` backs the monthly quiz board at `/api/scores`. Same deal as the chat function: a Pages Function, dependency-free, deployed with the repo.
+
+## The one setup step
+
+It needs a **KV namespace** bound as `QUIZ_SCORES`. Until that exists the endpoint reports `{"configured": false}` and the page shows "The shared board isn't switched on yet" while still keeping each player's own best score in their browser — so the quiz works before this is done, it just has no shared board.
+
+Cloudflare dashboard:
+
+1. **Storage & Databases → KV → Create a namespace**, name it `bob-dylan-quiz-scores`.
+2. **Workers & Pages → `bob-dylan-guide` → Settings → Bindings → Add → KV namespace**.
+3. Variable name `QUIZ_SCORES`, namespace the one just created. Add it for **Production** (and Preview, if you want the board to work on preview deploys).
+4. Redeploy, or push anything — bindings only attach on a new deployment.
+
+Free tier is 100,000 reads and 1,000 writes a day. A fan-site quiz will not come close.
+
+## How "clear the list every month" works
+
+It doesn't clear. Keys are namespaced by month:
+
+```
+score:2026-09:1757800000000-a1b2c3   metadata: { n: "Suze", s: 18, t: 143 }
+```
+
+On 1 October the page starts reading the `score:2026-10:` prefix, which is empty, and the September keys expire on their own after 70 days. There is no scheduled job to fail on the 1st, and no moment where the board is half-cleared.
+
+The month comes from the **server**, never the request — otherwise anyone could write onto a board that has already been settled.
+
+## One key per submission, not one per month
+
+A single key holding the whole board would make every submission a read-modify-write, and two players finishing at the same moment would lose one of the two scores. Per-submission keys have no such race; the board is one prefix `list()`, sorted in the function.
+
+The cost is that KV list is eventually consistent, so the row just written may not appear in the response to its own POST. The page merges its own result in locally rather than showing a board that is visibly missing the score it just confirmed.
+
+## Cheating
+
+The questions and their answers are in `assets/data/quiz.js`, because the quiz runs in the browser. Anyone who opens devtools can score 20/20. The function's checks stop casual nonsense only:
+
+| Check | Why |
+|---|---|
+| `0 ≤ score ≤ total`, integers | impossible scores |
+| `total ≤ 50`, `seconds ≤ 4h` | garbage payloads |
+| `seconds ≥ total × 1` | a scripted instant 20/20 |
+| name trimmed to 24 chars, control/zero-width/bidi characters stripped | names that sort to the top or break the layout |
+| 6 POSTs per minute per IP | floods |
+
+Server-side answer validation would be the real fix and it is not worth it here. The page says as much, which is the honest version.
+
+The rate limiter lives in module scope and Cloudflare runs many isolates — a speed bump, not a quota. For a real limit add a **Rate limiting rule** against `/api/scores` in the dashboard.
+
+## Writing next month's questions
+
+`assets/data/quiz.js` is a list of monthly sets, newest last. Add one:
+
+```js
+{ month: '2026-11', title: '…', questions: [ { q, a: [4 options], c: <index>, note }, …20 ] }
+```
+
+The page picks the set matching the current month; if none matches it serves the most recent past set and says so on the card, so a missed month degrades quietly instead of showing an empty page.
+
+The rules that make the questions worth playing are written at the top of that file. The short version: one defensible answer (disputed Dylan history stays out), distractors that are plausible to someone who knows the period, and a `note` written for the people who got it wrong.
+
+## Local development
+
+```bash
+npx --yes wrangler@3 pages dev . --port 8788 --kv QUIZ_SCORES
+```
+
+`--kv QUIZ_SCORES` gives you a local namespace under `.wrangler/` (gitignored), so the board works offline. Run it from the repo root — `wrangler pages dev` discovers `functions/` from the working directory, not from the directory argument, and pointing it at the repo from elsewhere silently serves the site with no functions at all.
