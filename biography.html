@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=2026091314">
+<link rel="stylesheet" href="assets/css/style.css?v=2026091315">
 </head>
 <body>
 
@@ -31,26 +31,32 @@
 
 <main class="wrap">
   <div class="jump" id="jump"></div>
-  <div id="eras"></div>
+  <div class="bio-layout">
+    <nav class="bio-rail" aria-label="Jump to an era">
+      <h2>The life in ten eras</h2>
+      <ol id="rail"></ol>
+    </nav>
+    <div id="eras"></div>
+  </div>
 </main>
 
-<script src="assets/data/albums.js?v=2026091314"></script>
-<script src="assets/data/songs.js?v=2026091314"></script>
-<script src="assets/data/timeline.js?v=2026091314"></script>
-<script src="assets/data/quotes.js?v=2026091314"></script>
-<script src="assets/data/stories.js?v=2026091314"></script>
-<script src="assets/data/interviews.js?v=2026091314"></script>
-<script src="assets/data/people.js?v=2026091314"></script>
-<script src="assets/data/looks.js?v=2026091314"></script>
-<script src="assets/data/library.js?v=2026091314"></script>
-<script src="assets/data/honors.js?v=2026091314"></script>
-<script src="assets/data/tours.js?v=2026091314"></script>
-<script src="assets/data/covers.js?v=2026091314"></script>
-<script src="assets/data/resources.js?v=2026091314"></script>
-<script src="assets/data/eras.js?v=2026091314"></script>
-<script src="assets/js/site.js?v=2026091314"></script>
-<script src="assets/js/chat-config.js?v=2026091314"></script>
-<script src="assets/js/chat.js?v=2026091314"></script>
+<script src="assets/data/albums.js?v=2026091315"></script>
+<script src="assets/data/songs.js?v=2026091315"></script>
+<script src="assets/data/timeline.js?v=2026091315"></script>
+<script src="assets/data/quotes.js?v=2026091315"></script>
+<script src="assets/data/stories.js?v=2026091315"></script>
+<script src="assets/data/interviews.js?v=2026091315"></script>
+<script src="assets/data/people.js?v=2026091315"></script>
+<script src="assets/data/looks.js?v=2026091315"></script>
+<script src="assets/data/library.js?v=2026091315"></script>
+<script src="assets/data/honors.js?v=2026091315"></script>
+<script src="assets/data/tours.js?v=2026091315"></script>
+<script src="assets/data/covers.js?v=2026091315"></script>
+<script src="assets/data/resources.js?v=2026091315"></script>
+<script src="assets/data/eras.js?v=2026091315"></script>
+<script src="assets/js/site.js?v=2026091315"></script>
+<script src="assets/js/chat-config.js?v=2026091315"></script>
+<script src="assets/js/chat.js?v=2026091315"></script>
 <script>
 DYLAN.chrome();
 var esc = DYLAN.esc;
@@ -59,17 +65,71 @@ document.getElementById('jump').innerHTML = DYLAN.eras.map(function (e) {
   return '<a href="#' + e.id + '">' + esc(e.title) + '</a>';
 }).join('');
 
+/* Bucket the dated events into eras by year, so the two data files stay
+   independent — eras.js and timeline.js group the life differently, and
+   matching on year range avoids maintaining a lookup between them. */
+function yearsOf(range) {
+  var m = String(range).match(/(\d{4})\D+(\d{4})/);
+  return m ? [+m[1], +m[2]] : [0, 0];
+}
+var taken = new Set();
+function eventsFor(era) {
+  var r = yearsOf(era.years);
+  return DYLAN.timeline.filter(function (t) {
+    if (taken.has(t) || t.year < r[0] || t.year > r[1]) return false;
+    taken.add(t);   // ranges touch at the edges; first era wins
+    return true;
+  });
+}
+
 document.getElementById('eras').innerHTML = DYLAN.eras.map(function (e) {
   var facts = e.facts.map(function (f) {
     return '<div class="era-fact"><span class="meta-label">' + esc(f[0]) + '</span><div>' + esc(f[1]) + '</div></div>';
   }).join('');
   var prose = e.body.map(function (p) { return '<p>' + esc(p) + '</p>'; }).join('');
+
+  var events = eventsFor(e);
+  var timeline = events.length
+    ? '<div class="era-timeline"><h4>Milestones</h4><ol>' + events.map(function (t) {
+        return '<li class="era-tl"><span class="d">' + esc(t.date) + '</span>' +
+               '<span class="t">' + esc(t.title) + '</span></li>';
+      }).join('') + '</ol></div>'
+    : '';
+
   return '<article class="era" id="' + e.id + '">' +
     '<div class="era-head"><span class="era-years">' + esc(e.years) + '</span>' +
     '<h2>' + esc(e.title) + '</h2><span class="era-tag">' + esc(e.tag) + '</span></div>' +
     '<div class="era-facts">' + facts + '</div>' +
-    '<div class="prose">' + prose + '</div></article>';
+    '<div class="prose">' + prose + '</div>' +
+    timeline + '</article>';
 }).join('');
+
+/* ---------- sticky era rail ---------- */
+
+document.getElementById('rail').innerHTML = DYLAN.eras.map(function (e) {
+  return '<li data-for="' + e.id + '"><a href="#' + e.id + '">' + esc(e.title) +
+    '<span class="yr">' + esc(e.years) + '</span></a></li>';
+}).join('');
+
+var railItems = [].slice.call(document.querySelectorAll('#rail li'));
+var eraNodes = DYLAN.eras.map(function (e) { return document.getElementById(e.id); });
+
+function markCurrent() {
+  // the era whose top is closest to just under the masthead
+  var best = 0;
+  for (var i = 0; i < eraNodes.length; i++) {
+    if (eraNodes[i].getBoundingClientRect().top <= 140) best = i;
+  }
+  railItems.forEach(function (li, i) { li.classList.toggle('on', i === best); });
+}
+
+var ticking = false;
+window.addEventListener('scroll', function () {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(function () { markCurrent(); ticking = false; });
+}, { passive: true });
+markCurrent();
 
 if (location.hash) {
   var t = document.getElementById(location.hash.slice(1));
