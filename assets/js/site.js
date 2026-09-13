@@ -101,6 +101,13 @@ window.DYLAN = window.DYLAN || {};
      links below both walk this list, so they can never disagree. */
   const SEQUENCE = [['index.html', 'Home']].concat(PRIMARY, MORE);
 
+  /* Exposed so pages can build their own navigation from the same list the
+     pager and the swipe walk. One source of truth: add a page to PRIMARY or
+     MORE and it appears in the nav, the pager, the swipe order and the home
+     grid at once. 'Home' is index 0; callers that are already the home page
+     will want to skip it. */
+  DYLAN.pages = SEQUENCE;
+
   function seqIndex(page) {
     for (let i = 0; i < SEQUENCE.length; i++) if (SEQUENCE[i][0] === page) return i;
     return -1;

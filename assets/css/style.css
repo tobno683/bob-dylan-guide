@@ -1940,3 +1940,56 @@ noscript .notice { display: block; }
   .pager-next { text-align: left; align-items: flex-start; }
   .pager-end { display: none; }
 }
+
+/* ---------- home page: all-pages tap grid (phones) ---------- */
+
+/* Two columns of plain targets. On a phone the six "Start here" cards stack
+   into a long scroll and the nav bar is behind a button, so the home page
+   doubles as the launcher — every page one tap away, above the fold. */
+.tile-grid {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.tile-grid a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 62px;
+  padding: 12px 10px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+  text-decoration: none;
+  font-family: 'Oswald', sans-serif;
+  font-size: .76rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  line-height: 1.3;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.tile-grid a:active,
+.tile-grid a:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+/* Fifteen identical tiles is a wall to scan, so the two most-wanted
+   destinations carry the accent and a larger face. Still the same two
+   columns — only the weight changes. */
+.tile-grid a:nth-child(-n+2) {
+  font-size: .9rem;
+  min-height: 70px;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+@media (max-width: 620px) {
+  .tile-grid { display: grid; }
+  /* the editorial cards and the full index are both redundant once the grid
+     above lists everything */
+  #start-cards { display: none; }
+  #all-section { display: none; }
+}
