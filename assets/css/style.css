@@ -209,15 +209,20 @@ h1, h2, h3, h4, h5 {
      Height is set directly rather than via aspect-ratio — aspect-ratio plus a
      max-height lets a short wide viewport shrink the *width* to satisfy the
      ratio, leaving the banner short of the right edge. */
-  height: min(40vw, 86vh);
-  min-height: 320px;
+  height: min(20vw, 56vh);
+  /* Floor is set by the overlaid title block, which runs to ~256px: any
+     shorter and the kicker, heading and lede spill out of the image. */
+  min-height: 270px;
   overflow: hidden;
   background: #17474c;
 }
 .hero-banner img {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: 85% center;
+  /* Sits high on purpose. At half the previous height the band shows only
+     about half the artwork, and a centred crop decapitates the figure — the
+     head, hair and record-sun all live in the top third. */
+  object-position: 85% 8%;
   display: block;
 }
 /* scrim from the artwork's own teal, so type stays readable over the sky */
