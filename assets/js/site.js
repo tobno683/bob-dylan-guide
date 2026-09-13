@@ -293,7 +293,8 @@ window.DYLAN = window.DYLAN || {};
   /* ---------- shared list helpers ---------- */
 
   DYLAN.filterList = function (opts) {
-    const { data, mount, render, searchFields, facetField, facetAll = 'All', countNoun = 'entries' } = opts;
+    const { data, mount, render, searchFields, facetField, facetAll = 'All',
+            countNoun = 'entries', onRender } = opts;
     const root = document.querySelector(mount);
     if (!root) return;
 
@@ -327,6 +328,9 @@ window.DYLAN = window.DYLAN || {};
       });
       count.textContent = rows.length + ' ' + countNoun;
       out.innerHTML = rows.length ? render(rows) : `<p class="empty">Nothing matches that.</p>`;
+      // lets a page rebuild anything derived from the output — the timeline's
+      // era rail has to follow whatever the filter left on screen
+      if (onRender) onRender(rows, out);
     }
 
     root.querySelector('.f-q').addEventListener('input', e => { q = e.target.value; apply(); });

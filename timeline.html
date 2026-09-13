@@ -9,13 +9,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,500;0,700;0,900;1,500;1,700&family=Oswald:wght@300;400;500&family=Spectral:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=2026091318">
+<link rel="stylesheet" href="assets/css/style.css?v=2026091402">
 </head>
 <body>
 
 <div class="page-stage">
   <div class="page-banner">
-    <img src="assets/img/page-header.png?v=2026091318" width="1920" height="640" alt=""
+    <img src="assets/img/page-header.png?v=2026091402" width="1920" height="640" alt=""
          fetchpriority="high" decoding="async">
   </div>
   <div class="page-copy">
@@ -30,29 +30,93 @@
 </div>
 
 <main class="wrap">
-  <div id="tl-mount"></div>
+  <div class="rail-layout">
+    <nav class="side-rail" aria-label="Jump to an era">
+      <h2>Eras</h2>
+      <ol id="rail"></ol>
+    </nav>
+    <div id="tl-mount"></div>
+  </div>
 </main>
 
-<script src="assets/data/albums.js?v=2026091318"></script>
-<script src="assets/data/songs.js?v=2026091318"></script>
-<script src="assets/data/timeline.js?v=2026091318"></script>
-<script src="assets/data/quotes.js?v=2026091318"></script>
-<script src="assets/data/stories.js?v=2026091318"></script>
-<script src="assets/data/interviews.js?v=2026091318"></script>
-<script src="assets/data/people.js?v=2026091318"></script>
-<script src="assets/data/looks.js?v=2026091318"></script>
-<script src="assets/data/library.js?v=2026091318"></script>
-<script src="assets/data/honors.js?v=2026091318"></script>
-<script src="assets/data/tours.js?v=2026091318"></script>
-<script src="assets/data/covers.js?v=2026091318"></script>
-<script src="assets/data/resources.js?v=2026091318"></script>
-<script src="assets/data/eras.js?v=2026091318"></script>
-<script src="assets/js/site.js?v=2026091318"></script>
-<script src="assets/js/chat-config.js?v=2026091318"></script>
-<script src="assets/js/chat.js?v=2026091318"></script>
+<script src="assets/data/albums.js?v=2026091402"></script>
+<script src="assets/data/songs.js?v=2026091402"></script>
+<script src="assets/data/timeline.js?v=2026091402"></script>
+<script src="assets/data/quotes.js?v=2026091402"></script>
+<script src="assets/data/stories.js?v=2026091402"></script>
+<script src="assets/data/interviews.js?v=2026091402"></script>
+<script src="assets/data/people.js?v=2026091402"></script>
+<script src="assets/data/looks.js?v=2026091402"></script>
+<script src="assets/data/library.js?v=2026091402"></script>
+<script src="assets/data/honors.js?v=2026091402"></script>
+<script src="assets/data/tours.js?v=2026091402"></script>
+<script src="assets/data/covers.js?v=2026091402"></script>
+<script src="assets/data/resources.js?v=2026091402"></script>
+<script src="assets/data/eras.js?v=2026091402"></script>
+<script src="assets/js/site.js?v=2026091402"></script>
+<script src="assets/js/chat-config.js?v=2026091402"></script>
+<script src="assets/js/chat.js?v=2026091402"></script>
 <script>
 DYLAN.chrome();
 var esc = DYLAN.esc;
+
+function eraSlug(era) { return 'era-' + era.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
+/* ---------- era rail ----------
+   Declared before filterList runs: filterList renders immediately, and the
+   onRender hook fires inside that first call. */
+
+var rail = document.getElementById('rail');
+var headings = [];
+
+/* The filter toolbar is sticky under the masthead and its chips wrap, so its
+   height changes with the viewport. Measure it instead of guessing, or a rail
+   link parks the heading underneath it. */
+function stickyOffset() {
+  var tb = document.querySelector('#tl-mount .toolbar');
+  if (!tb) return 74;
+  var sticky = getComputedStyle(tb).position === 'sticky';
+  return sticky ? 56 + tb.offsetHeight + 14 : 70;
+}
+
+function applyOffset() {
+  var off = stickyOffset();
+  headings.forEach(function (h) { h.style.scrollMarginTop = off + 'px'; });
+}
+
+function buildRail(rows, out) {
+  headings = [].slice.call(out.querySelectorAll('.tl-era'));
+  if (!headings.length) { rail.innerHTML = ''; return; }
+
+  rail.innerHTML = headings.map(function (h) {
+    var count = 0;
+    for (var n = h.nextElementSibling; n && !n.classList.contains('tl-era'); n = n.nextElementSibling) count++;
+    return '<li><a href="#' + h.id + '">' + esc(h.textContent) +
+      '<span class="yr">' + count + ' event' + (count === 1 ? '' : 's') + '</span></a></li>';
+  }).join('');
+  applyOffset();
+  markCurrent();
+}
+
+function markCurrent() {
+  var items = rail.querySelectorAll('li');
+  if (!items.length) return;
+  var line = stickyOffset() + 6;
+  var best = 0;
+  for (var i = 0; i < headings.length; i++) {
+    if (headings[i].getBoundingClientRect().top <= line) best = i;
+  }
+  for (var j = 0; j < items.length; j++) items[j].classList.toggle('on', j === best);
+}
+
+var ticking = false;
+window.addEventListener('scroll', function () {
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(function () { markCurrent(); ticking = false; });
+}, { passive: true });
+
+window.addEventListener('resize', function () { applyOffset(); markCurrent(); });
 
 DYLAN.filterList({
   data: DYLAN.timeline,
@@ -65,14 +129,17 @@ DYLAN.filterList({
     var lastEra = null;
     rows.forEach(function (t) {
       if (t.era !== lastEra) {
-        html += '<h3 class="tl-era">' + esc(t.era) + '</h3>';
+        html += '<h3 class="tl-era" id="' + eraSlug(t.era) + '">' + esc(t.era) + '</h3>';
         lastEra = t.era;
       }
       html += '<div class="tl-item"><div class="tl-date">' + esc(t.date) + '</div>' +
         '<div class="tl-body"><strong>' + esc(t.title) + '</strong><p>' + esc(t.body) + '</p></div></div>';
     });
     return html + '</div>';
-  }
+  },
+  // Filtering changes which eras are on screen, so the rail is rebuilt from
+  // whatever actually rendered rather than from the full dataset.
+  onRender: buildRail
 });
 </script>
 </body>
