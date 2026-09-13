@@ -209,7 +209,10 @@ h1, h2, h3, h4, h5 {
      Height is set directly rather than via aspect-ratio — aspect-ratio plus a
      max-height lets a short wide viewport shrink the *width* to satisfy the
      ratio, leaving the banner short of the right edge. */
-  height: min(20vw, 56vh);
+  /* 28.02vw is exactly 1/3.5688 — the artwork's own ratio — so the whole
+     image shows with no crop at any width. Change this number and it starts
+     cropping again. The vh term only bites on very short windows. */
+  height: min(28.02vw, 72vh);
   /* Floor is set by the overlaid title block, which runs to ~256px: any
      shorter and the kicker, heading and lede spill out of the image. */
   min-height: 270px;
@@ -219,10 +222,9 @@ h1, h2, h3, h4, h5 {
 .hero-banner img {
   width: 100%; height: 100%;
   object-fit: cover;
-  /* Sits high on purpose. At half the previous height the band shows only
-     about half the artwork, and a centred crop decapitates the figure — the
-     head, hair and record-sun all live in the top third. */
-  object-position: 85% 8%;
+  /* Nothing to choose: the box matches the artwork's ratio, so this only
+     applies on the short-window and min-height edges. */
+  object-position: 85% center;
   display: block;
 }
 /* scrim from the artwork's own teal, so type stays readable over the sky */
@@ -1474,7 +1476,9 @@ noscript .notice { display: block; }
   .hero-stage > .hero-banner { grid-row: 1; }
   .hero-stage > .hero-copy { grid-row: 2; }
   .hero-banner { height: clamp(280px, 62vw, 420px); max-height: none; }
-  .hero-banner img { object-position: 76% center; }
+  /* The narrow band can only show about a third of a 3.57:1 image, so aim it
+     at the figure rather than splitting the difference and clipping him. */
+  .hero-banner img { object-position: 92% center; }
   .hero-banner::after {
     background: linear-gradient(180deg, rgba(11,40,44,0) 62%, rgba(11,40,44,.3) 100%);
   }
