@@ -148,3 +148,56 @@ npx --yes wrangler@3 pages dev . --port 8788 --kv QUIZ_SCORES
 ```
 
 `--kv QUIZ_SCORES` gives you a local namespace under `.wrangler/` (gitignored), so the board works offline. Run it from the repo root — `wrangler pages dev` discovers `functions/` from the working directory, not from the directory argument, and pointing it at the repo from elsewhere silently serves the site with no functions at all.
+
+---
+
+# Contact form
+
+`api/contact.ts` backs the Contact button at the foot of every page. Same shape as the others: a Pages Function, dependency-free, deployed with the repo.
+
+## Why it exists rather than a `mailto:` link
+
+A `mailto:` puts the address in the page source, where scrapers find it within days. The point of this form is that **the address is never in anything the browser receives** — it lives in a Cloudflare secret and only the function reads it.
+
+Worth being clear-eyed about what that buys: the endpoint is an open relay of exactly one shape. Anyone can make it send one short message to one fixed address. What they *cannot* do is choose the address, which is the property that matters. Volume is the remaining risk, and the limits below are what handle it.
+
+## Setup
+
+Two secrets on the Pages project — **Settings → Variables and secrets**:
+
+| Type | Name | Value |
+|---|---|---|
+| Secret | `RESEND_API_KEY` | from resend.com → API Keys |
+| Secret | `CONTACT_TO` | the address messages should reach |
+
+Optionally `CONTACT_FROM` to override the sender. The default is `onboarding@resend.dev`, which Resend allows **without domain verification but only to the account owner's own address** — which is exactly this case, so no domain is needed. If you ever want mail from your own domain, verify it in Resend and set `CONTACT_FROM` accordingly.
+
+Bindings and secrets attach at build time, so **redeploy after adding them** or the endpoint keeps reporting that the form isn't switched on. Until they exist it returns 503 with `configured:false` and the form says so politely rather than failing silently.
+
+Free tier is 3,000 emails a month. A fan site's contact form will not come close.
+
+## What stops the spam
+
+| Check | Why |
+|---|---|
+| Honeypot field, off-screen and `aria-hidden` | People never see it; form-filling scripts fill every field they find |
+| Minimum two seconds between opening and sending | A form completed instantly was not read |
+| 3 sends per IP per 10 minutes | Floods |
+| Message at least 10 characters, at most 4000 | Junk and payloads |
+| `reply_to` only when it parses as an address | A malformed one would fail the whole send |
+
+The honeypot and timing checks answer **exactly as if the send succeeded**. Telling a bot it was caught only teaches whoever wrote it to stop filling that field.
+
+The rate limiter runs *before* those checks, so a script gets no free attempts. It lives in module scope and Cloudflare runs many isolates, so it is a speed bump rather than a quota — for a hard limit add a **Rate limiting rule** against `/api/contact` in the dashboard, which runs at the edge before this code.
+
+## Errors
+
+The visitor only ever sees "Couldn't send that just now." The provider's actual reason goes to `console.error`, visible in `wrangler pages deployment tail` — there is nothing in the response for someone to probe with.
+
+## Local development
+
+```bash
+npx --yes wrangler@3 pages dev . --port 8788
+```
+
+Put `RESEND_API_KEY` and `CONTACT_TO` in `.dev.vars` at the repo root (gitignored). With a deliberately invalid key the endpoint returns 502 and logs the provider's rejection, which is enough to exercise everything except delivery itself.

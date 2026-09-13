@@ -346,13 +346,122 @@ window.DYLAN = window.DYLAN || {};
     document.addEventListener('touchcancel', () => { tracking = false; hidePeek(); }, { passive: true });
   }
 
+  /* ---------- contact ---------- */
+
+  /* The owner's address is deliberately absent from all of this. There is no
+     mailto: anywhere on the site; the form posts to /api/contact and the
+     function holds the address as a secret. Nothing here reveals who the
+     message reaches. */
+  function contactHTML() {
+    return `
+      <div class="contact-bar">
+        <button class="qbtn qbtn-ghost contact-open" id="contact-btn">Contact</button>
+      </div>
+      <div class="contact-overlay" id="contact-overlay" hidden>
+        <div class="contact-panel" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+          <button class="modal-close" id="contact-close" aria-label="Close">×</button>
+          <p class="kicker">Get in touch</p>
+          <h2 id="contact-title">Send a message</h2>
+          <p class="contact-intro">Corrections, additions, arguments about Newport — all welcome. Leave an address only if you want a reply.</p>
+          <form id="contact-form">
+            <label for="c-name">Your name <span>optional</span></label>
+            <input id="c-name" class="search-input" type="text" maxlength="80" autocomplete="name">
+
+            <label for="c-email">Your email <span>optional, for a reply</span></label>
+            <input id="c-email" class="search-input" type="email" maxlength="160" autocomplete="email">
+
+            <label for="c-message">Message</label>
+            <textarea id="c-message" class="search-input" rows="6" maxlength="4000" required></textarea>
+
+            <!-- Honeypot: off-screen and hidden from assistive tech, so only a
+                 script that fills every field it finds will touch it. -->
+            <div class="contact-hp" aria-hidden="true">
+              <label for="c-website">Website</label>
+              <input id="c-website" type="text" tabindex="-1" autocomplete="off">
+            </div>
+
+            <button class="qbtn" type="submit" id="contact-send">Send</button>
+            <p class="contact-msg" id="contact-msg"></p>
+          </form>
+        </div>
+      </div>`;
+  }
+
+  function initContact() {
+    const overlay = document.getElementById('contact-overlay');
+    const form = document.getElementById('contact-form');
+    const msg = document.getElementById('contact-msg');
+    const send = document.getElementById('contact-send');
+    let openedAt = 0;
+
+    function open() {
+      overlay.hidden = false;
+      openedAt = Date.now();
+      msg.textContent = '';
+      msg.className = 'contact-msg';
+      setTimeout(() => document.getElementById('c-message').focus(), 40);
+    }
+    function close() { overlay.hidden = true; }
+
+    document.getElementById('contact-btn').addEventListener('click', open);
+    document.getElementById('contact-close').addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !overlay.hidden) close();
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const message = document.getElementById('c-message').value.trim();
+      if (message.length < 10) {
+        msg.textContent = 'A little more than that, and it will go.';
+        msg.className = 'contact-msg bad';
+        return;
+      }
+
+      send.disabled = true;
+      msg.textContent = 'Sending…';
+      msg.className = 'contact-msg';
+
+      try {
+        const r = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('c-name').value,
+            email: document.getElementById('c-email').value,
+            message: message,
+            website: document.getElementById('c-website').value,
+            // how long the form was open — the function rejects instant fills
+            openMs: Date.now() - openedAt
+          })
+        });
+        const d = await r.json().catch(() => ({}));
+        if (r.ok && d.ok) {
+          form.reset();
+          msg.textContent = 'Sent. Thank you.';
+          msg.className = 'contact-msg good';
+          setTimeout(close, 1800);
+        } else {
+          send.disabled = false;
+          msg.textContent = d.error || 'That did not go through.';
+          msg.className = 'contact-msg bad';
+        }
+      } catch (err) {
+        send.disabled = false;
+        msg.textContent = 'Could not reach the server.';
+        msg.className = 'contact-msg bad';
+      }
+    });
+  }
+
   /* ---------- boot ---------- */
 
   DYLAN.chrome = function () {
     const active = currentPage();
     document.body.insertAdjacentHTML('afterbegin', navHTML(active));
     document.body.insertAdjacentHTML('beforeend',
-      pagerHTML(active) + footerHTML() + overlayHTML() +
+      pagerHTML(active) + footerHTML() + contactHTML() + overlayHTML() +
       '<div class="swipe-peek" id="swipe-peek" hidden><span></span></div>');
 
     document.getElementById('theme-btn').textContent =
@@ -396,6 +505,7 @@ window.DYLAN = window.DYLAN || {};
     });
 
     initSwipe(active);
+    initContact();
 
     document.getElementById('search-btn').addEventListener('click', openSearch);
     document.getElementById('search-overlay').addEventListener('click', (e) => {
