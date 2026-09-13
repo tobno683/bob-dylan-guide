@@ -96,6 +96,41 @@ window.DYLAN = window.DYLAN || {};
       </header>`;
   }
 
+  /* The order a reader moves through the guide: the home page, then the nav
+     bar left to right, then everything behind "More". Swipe and the pager
+     links below both walk this list, so they can never disagree. */
+  const SEQUENCE = [['index.html', 'Home']].concat(PRIMARY, MORE);
+
+  function seqIndex(page) {
+    for (let i = 0; i < SEQUENCE.length; i++) if (SEQUENCE[i][0] === page) return i;
+    return -1;
+  }
+
+  /* Prev/next links above the footer. They are the reason the gesture is
+     discoverable at all — a swipe nobody is told about is a swipe nobody
+     uses — and they are the whole feature for anyone on a mouse, a keyboard
+     or a screen reader. */
+  function pagerHTML(active) {
+    const i = seqIndex(active);
+    if (i === -1) return '';
+    const prev = i > 0 ? SEQUENCE[i - 1] : null;
+    const next = i < SEQUENCE.length - 1 ? SEQUENCE[i + 1] : null;
+    if (!prev && !next) return '';
+
+    const side = (item, dir) => item
+      ? `<a class="pager-${dir}" href="${item[0]}" rel="${dir}">` +
+        `<span class="pager-dir">${dir === 'prev' ? '← Previous' : 'Next →'}</span>` +
+        `<span class="pager-name">${esc(item[1])}</span></a>`
+      : `<span class="pager-${dir} pager-end"></span>`;
+
+    return `
+      <nav class="pager" aria-label="Previous and next page">
+        ${side(prev, 'prev')}
+        ${side(next, 'next')}
+      </nav>
+      <p class="pager-hint">Swipe left or right to move between pages.</p>`;
+  }
+
   function footerHTML() {
     const col = (title, items) =>
       `<div><h4>${title}</h4><ul>${items.map(([h, l]) => `<li><a href="${h}">${l}</a></li>`).join('')}</ul></div>`;
@@ -203,12 +238,115 @@ window.DYLAN = window.DYLAN || {};
     document.body.style.overflow = '';
   }
 
+  /* ---------- swipe between pages (touch, narrow screens) ---------- */
+
+  /* Matches the width at which the nav collapses — above it the whole bar is
+     on screen and a gesture would mostly be a way to navigate by accident. */
+  const SWIPE_MAX_WIDTH = 940;
+
+  /* Both mobile browsers reserve the screen edges for their own back/forward
+     gesture. Anything starting in that strip belongs to them, not to us. */
+  const EDGE_GUARD = 28;
+
+  const SWIPE_MIN_X = 70;      // far enough to be deliberate
+  const SWIPE_MAX_TIME = 700;  // a swipe, not a slow drag
+  const SWIPE_RATIO = 1.8;     // horizontal has to clearly beat vertical
+
+  /* A swipe starting on something the finger is meant to scroll sideways, or
+     inside an overlay, is not a page gesture. Detected by walking up from the
+     touched node and asking whether it actually scrolls, rather than by
+     listing selectors, so anything added to the site later is covered. */
+  function swipeBlocked(node) {
+    for (let el = node; el && el !== document.body; el = el.parentElement) {
+      if (el.matches && el.matches('.modal, .chat-panel, .search-overlay, .nav, .pager')) return true;
+      const ox = getComputedStyle(el).overflowX;
+      if ((ox === 'auto' || ox === 'scroll') && el.scrollWidth > el.clientWidth + 2) return true;
+    }
+    return false;
+  }
+
+  function initSwipe(active) {
+    const i = seqIndex(active);
+    if (i === -1) return;
+
+    const prev = i > 0 ? SEQUENCE[i - 1] : null;
+    const next = i < SEQUENCE.length - 1 ? SEQUENCE[i + 1] : null;
+    if (!prev && !next) return;
+
+    const peek = document.getElementById('swipe-peek');
+    const peekName = peek.querySelector('span');
+
+    let x0 = 0, y0 = 0, t0 = 0, tracking = false, target = null;
+
+    function showPeek(item, side, progress) {
+      const p = Math.max(0, Math.min(1, progress));
+      peekName.textContent = item[1];
+      peek.className = 'swipe-peek on-' + side;
+      peek.hidden = false;
+      peek.style.opacity = p;
+      peek.style.transform =
+        'translateY(-50%) translateX(' + ((side === 'right' ? 1 : -1) * (1 - p) * 18) + 'px)';
+    }
+    function hidePeek() { peek.hidden = true; peek.style.opacity = 0; target = null; }
+
+    document.addEventListener('touchstart', (e) => {
+      tracking = false;
+      hidePeek();
+      if (window.innerWidth > SWIPE_MAX_WIDTH) return;
+      if (e.touches.length !== 1) return;
+
+      const t = e.touches[0];
+      if (t.clientX < EDGE_GUARD || t.clientX > window.innerWidth - EDGE_GUARD) return;
+      if (swipeBlocked(e.target)) return;
+
+      x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
+      tracking = true;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!tracking || e.touches.length !== 1) return;
+      const dx = e.touches[0].clientX - x0;
+      const dy = e.touches[0].clientY - y0;
+
+      /* Once the finger has committed to vertical it is a scroll and stays a
+         scroll — sideways drift later in the same gesture must not navigate. */
+      if (Math.abs(dy) > 24 && Math.abs(dy) > Math.abs(dx)) { tracking = false; hidePeek(); return; }
+      if (Math.abs(dx) < 20 || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) { hidePeek(); return; }
+
+      const want = dx < 0 ? next : prev;
+      if (!want) { hidePeek(); return; }
+      target = want;
+      showPeek(want, dx < 0 ? 'right' : 'left', (Math.abs(dx) - 20) / (SWIPE_MIN_X - 20));
+    }, { passive: true });
+
+    document.addEventListener('touchend', (e) => {
+      const hit = target;
+      const wasTracking = tracking;
+      tracking = false;
+      hidePeek();
+      if (!wasTracking || !hit) return;
+
+      const t = e.changedTouches[0];
+      const dx = t.clientX - x0;
+      const dy = t.clientY - y0;
+      if (Math.abs(dx) < SWIPE_MIN_X) return;
+      if (Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+      if (Date.now() - t0 > SWIPE_MAX_TIME) return;
+
+      location.href = hit[0];
+    }, { passive: true });
+
+    document.addEventListener('touchcancel', () => { tracking = false; hidePeek(); }, { passive: true });
+  }
+
   /* ---------- boot ---------- */
 
   DYLAN.chrome = function () {
     const active = currentPage();
     document.body.insertAdjacentHTML('afterbegin', navHTML(active));
-    document.body.insertAdjacentHTML('beforeend', footerHTML() + overlayHTML());
+    document.body.insertAdjacentHTML('beforeend',
+      pagerHTML(active) + footerHTML() + overlayHTML() +
+      '<div class="swipe-peek" id="swipe-peek" hidden><span></span></div>');
 
     document.getElementById('theme-btn').textContent =
       document.documentElement.getAttribute('data-theme') === 'dark' ? '☀' : '☾';
@@ -249,6 +387,8 @@ window.DYLAN = window.DYLAN || {};
       moreMenu.classList.remove('open');
       moreBtn.setAttribute('aria-expanded', 'false');
     });
+
+    initSwipe(active);
 
     document.getElementById('search-btn').addEventListener('click', openSearch);
     document.getElementById('search-overlay').addEventListener('click', (e) => {

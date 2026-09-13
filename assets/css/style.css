@@ -1844,3 +1844,99 @@ noscript .notice { display: block; }
   .submit-line { flex-wrap: wrap; }
   .submit-line .qbtn { width: 100%; }
 }
+
+/* ---------- page-to-page navigation: pager + swipe ---------- */
+
+.pager {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 22px 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.pager a {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--card);
+  text-decoration: none;
+  transition: border-color .15s, background .15s;
+}
+.pager a:hover { border-color: var(--accent); background: var(--accent-dim); }
+.pager-next { text-align: right; align-items: flex-end; }
+
+.pager-dir {
+  font-family: 'Oswald', sans-serif;
+  font-size: .6rem;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.pager-name {
+  font-family: 'Bodoni Moda', Didot, Georgia, serif;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.pager a:hover .pager-name { color: var(--accent); }
+
+/* keeps the remaining link on its own side at the ends of the sequence */
+.pager-end { display: block; }
+
+.pager-hint {
+  display: none;          /* pointer devices have nothing to swipe */
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 22px 4px;
+  font-size: .76rem;
+  font-style: italic;
+  color: var(--ink-3);
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* The label that slides in while a swipe is in progress, so the gesture says
+   where it is going before it commits — and says nothing at the ends of the
+   sequence, where it would be lying. */
+.swipe-peek {
+  position: fixed;
+  top: 50%;
+  z-index: 180;
+  padding: 11px 17px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 100px;
+  box-shadow: var(--shadow);
+  font-family: 'Oswald', sans-serif;
+  font-size: .72rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  max-width: 60vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+:root:not([data-theme="light"]) .swipe-peek { color: #17140f; }
+.swipe-peek.on-right { right: 14px; }
+.swipe-peek.on-left { left: 14px; }
+
+@media (hover: none) and (pointer: coarse) {
+  .pager-hint { display: block; }
+}
+
+@media (max-width: 620px) {
+  .pager { grid-template-columns: 1fr; }
+  .pager-next { text-align: left; align-items: flex-start; }
+  .pager-end { display: none; }
+}
