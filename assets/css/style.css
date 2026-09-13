@@ -348,10 +348,11 @@ h1, h2, h3, h4, h5 {
   position: relative;
   width: 100%;
   /* Same reasoning as .hero-banner: proportional height, no px cap, so the
-     band looks identical on a 13" laptop and a 32" monitor. About a fifth
-     shorter than the artwork's own proportions, with object-position sitting
-     low so the loss comes off the sky rather than the road and the figure. */
-  height: min(18.5vw, 36vh);
+     band looks identical on a 13" laptop and a 32" monitor. The artwork is
+     2.36:1 — taller than the 3:1 it replaced — so the old 18.5vw band showed
+     noticeably less of it and cut the guitar case. 21vw restores roughly half
+     the artwork; object-position below decides which half. */
+  height: min(21vw, 38vh);
   /* Floor is set by the overlaid title, not by taste: the kicker, heading and
      lede run to ~200px, and a shorter band would let them spill out of the
      image. Below roughly 1140px the 20% trim therefore tapers off. */
@@ -362,7 +363,13 @@ h1, h2, h3, h4, h5 {
 .page-banner img {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: 50% 58%;
+  /* Tuned to the artwork: the sun sits around 42–48% of its height and the
+     guitar case bottoms out near 88%. This percentage is not "centre the band
+     there" — it distributes the cropped overflow, so 80% puts 80% of the loss
+     above and lands the band on roughly 40–90%: sun, figure and case all in,
+     with the empty sky taking the cut. Horizontal is moot; the image is wider
+     than the band, so cover crops vertically only. */
+  object-position: 50% 80%;
   display: block;
 }
 .page-banner::after {
