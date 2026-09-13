@@ -304,8 +304,13 @@ h1, h2, h3, h4, h5 {
   position: relative;
   width: 100%;
   /* Same reasoning as .hero-banner: proportional height, no px cap, so the
-     band looks identical on a 13" laptop and a 32" monitor. */
-  height: min(23vw, 45vh);
+     band looks identical on a 13" laptop and a 32" monitor. About a fifth
+     shorter than the artwork's own proportions, with object-position sitting
+     low so the loss comes off the sky rather than the road and the figure. */
+  height: min(18.5vw, 36vh);
+  /* Floor is set by the overlaid title, not by taste: the kicker, heading and
+     lede run to ~200px, and a shorter band would let them spill out of the
+     image. Below roughly 1140px the 20% trim therefore tapers off. */
   min-height: 210px;
   overflow: hidden;
   background: #1d3b40;
@@ -313,7 +318,7 @@ h1, h2, h3, h4, h5 {
 .page-banner img {
   width: 100%; height: 100%;
   object-fit: cover;
-  object-position: 50% 42%;
+  object-position: 50% 58%;
   display: block;
 }
 .page-banner::after {
